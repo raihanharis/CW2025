@@ -17,12 +17,12 @@ public class GameController implements InputEventListener {
     @Override
     public DownData onDownEvent(MoveEvent event) {
         boolean canMove = board.moveBrickDown();
-        ClearRow clearRow = null;
+        RowClearResult rowClearResult = null;
         if (!canMove) {
             board.mergeBrickToBackground();
-            clearRow = board.clearRows();
-            if (clearRow.getLinesRemoved() > 0) {
-                board.getScore().add(clearRow.getScoreBonus());
+            rowClearResult = board.clearRows();
+            if (rowClearResult.getRowsCleared() > 0) {
+                board.getScore().add(rowClearResult.getPointsEarned());
             }
             if (board.createNewBrick()) {
                 viewGuiController.gameOver();
@@ -35,7 +35,7 @@ public class GameController implements InputEventListener {
                 board.getScore().add(1);
             }
         }
-        return new DownData(clearRow, board.getViewData());
+        return new DownData(rowClearResult, board.getViewData());
     }
 
     @Override

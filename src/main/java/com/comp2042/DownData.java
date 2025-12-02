@@ -1,16 +1,16 @@
 package com.comp2042;
 
 public final class DownData {
-    private final ClearRow clearRow;
+    private final RowClearResult rowClearResult;
     private final ViewData viewData;
 
-    public DownData(ClearRow clearRow, ViewData viewData) {
-        this.clearRow = clearRow;
+    public DownData(RowClearResult rowClearResult, ViewData viewData) {
+        this.rowClearResult = rowClearResult;
         this.viewData = viewData;
     }
 
-    public ClearRow getClearRow() {
-        return clearRow;
+    public RowClearResult getClearRow() {
+        return rowClearResult;
     }
 
     public ViewData getViewData() {

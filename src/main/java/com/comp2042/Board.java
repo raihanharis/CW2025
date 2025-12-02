@@ -18,7 +18,7 @@ public interface Board {
 
     void mergeBrickToBackground();
 
-    ClearRow clearRows();
+    RowClearResult clearRows();
 
     Score getScore();
 
