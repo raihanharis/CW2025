@@ -6,20 +6,38 @@ import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MatrixOperations {
+/**
+ * Utility class that provides various matrix operations used in the Tetris game,
+ * such as copying matrices, merging bricks, checking collisions, and clearing full rows.
+ *
+ * This class cannot be instantiated.
+ */
+public final class MatrixOperations {
 
+    /** Prevent instantiation of utility class. */
+    private MatrixOperations() { }
 
-    //We don't want to instantiate this utility class
-    private MatrixOperations(){
-
-    }
-
+    /**
+     * Checks whether placing the given brick at the specified (x, y) position
+     * would intersect with existing filled cells or the game boundaries.
+     *
+     * @param matrix the current state of the game board
+     * @param brick the brick matrix to test for collision
+     * @param x the target X position on the board
+     * @param y the target Y position on the board
+     * @return true if a collision occurs, false otherwise
+     */
     public static boolean intersect(final int[][] matrix, final int[][] brick, int x, int y) {
-        for (int i = 0; i < brick.length; i++) {
-            for (int j = 0; j < brick[i].length; j++) {
-                int targetX = x + i;
-                int targetY = y + j;
-                if (brick[j][i] != 0 && (checkOutOfBound(matrix, targetX, targetY) || matrix[targetY][targetX] != 0)) {
+        for (int row = 0; row < brick.length; row++) {
+            for (int col = 0; col < brick[row].length; col++) {
+
+                // Corrected bug: brick[row][col] (not brick[col][row])
+                if (brick[row][col] == 0) continue;
+
+                int targetX = x + col;
+                int targetY = y + row;
+
+                if (isOutOfBounds(matrix, targetX, targetY) || matrix[targetY][targetX] != 0) {
                     return true;
                 }
             }
@@ -27,73 +45,119 @@ public class MatrixOperations {
         return false;
     }
 
-    private static boolean checkOutOfBound(int[][] matrix, int targetX, int targetY) {
-        boolean returnValue = true;
-        if (targetX >= 0 && targetY < matrix.length && targetX < matrix[targetY].length) {
-            returnValue = false;
-        }
-        return returnValue;
+    /**
+     * Returns true if the given coordinates lie outside the board.
+     */
+    private static boolean isOutOfBounds(int[][] matrix, int x, int y) {
+        return x < 0 || y < 0 || y >= matrix.length || x >= matrix[y].length;
     }
 
+    /**
+     * Creates and returns a deep copy of a matrix.
+     *
+     * @param original the matrix to copy
+     * @return a new deep-copied matrix
+     */
     public static int[][] copy(int[][] original) {
-        int[][] myInt = new int[original.length][];
+        int[][] copied = new int[original.length][];
         for (int i = 0; i < original.length; i++) {
-            int[] aMatrix = original[i];
-            int aLength = aMatrix.length;
-            myInt[i] = new int[aLength];
-            System.arraycopy(aMatrix, 0, myInt[i], 0, aLength);
+            copied[i] = new int[original[i].length];
+            System.arraycopy(original[i], 0, copied[i], 0, original[i].length);
         }
-        return myInt;
+        return copied;
     }
 
-    public static int[][] merge(int[][] filledFields, int[][] brick, int x, int y) {
-        int[][] copy = copy(filledFields);
-        for (int i = 0; i < brick.length; i++) {
-            for (int j = 0; j < brick[i].length; j++) {
-                int targetX = x + i;
-                int targetY = y + j;
-                if (brick[j][i] != 0) {
-                    copy[targetY][targetX] = brick[j][i];
-                }
+    /**
+     * Merges a brick into the game matrix at a specific location.
+     * Does not modify the original matrix; instead returns a modified copy.
+     *
+     * @param matrix the current game matrix
+     * @param brick the brick to merge
+     * @param x the X position to merge at
+     * @param y the Y position to merge at
+     * @return a new matrix containing the merged brick
+     */
+    public static int[][] merge(int[][] matrix, int[][] brick, int x, int y) {
+        int[][] merged = copy(matrix);
+
+        for (int row = 0; row < brick.length; row++) {
+            for (int col = 0; col < brick[row].length; col++) {
+
+                if (brick[row][col] == 0) continue;
+
+                int targetX = x + col;
+                int targetY = y + row;
+
+                merged[targetY][targetX] = brick[row][col];
             }
         }
-        return copy;
+        return merged;
     }
 
+    /**
+     * Checks the matrix for full rows, removes them, shifts everything downward,
+     * and calculates bonus points.
+     *
+     * @param matrix the current game matrix
+     * @return a RowClearResult object containing:
+     *         - number of cleared rows
+     *         - updated matrix after removal
+     *         - points earned
+     */
     public static RowClearResult checkRemoving(final int[][] matrix) {
-        int[][] tmp = new int[matrix.length][matrix[0].length];
-        Deque<int[]> newRows = new ArrayDeque<>();
-        List<Integer> clearedRows = new ArrayList<>();
+        int height = matrix.length;
+        int width = matrix[0].length;
 
-        for (int i = 0; i < matrix.length; i++) {
-            int[] tmpRow = new int[matrix[i].length];
-            boolean rowToClear = true;
-            for (int j = 0; j < matrix[0].length; j++) {
-                if (matrix[i][j] == 0) {
-                    rowToClear = false;
+        int[][] updatedMatrix = new int[height][width];
+
+        Deque<int[]> keptRows = new ArrayDeque<>();
+        List<Integer> clearedRowIndices = new ArrayList<>();
+
+        // Scan rows from top to bottom
+        for (int r = 0; r < height; r++) {
+            int[] rowCopy = new int[width];
+            boolean isFull = true;
+
+            for (int c = 0; c < width; c++) {
+                rowCopy[c] = matrix[r][c];
+                if (matrix[r][c] == 0) {
+                    isFull = false;
                 }
-                tmpRow[j] = matrix[i][j];
             }
-            if (rowToClear) {
-                clearedRows.add(i);
+
+            if (isFull) {
+                clearedRowIndices.add(r);
             } else {
-                newRows.add(tmpRow);
+                keptRows.add(rowCopy);
             }
         }
-        for (int i = matrix.length - 1; i >= 0; i--) {
-            int[] row = newRows.pollLast();
+
+        // Fill updatedMatrix bottom-up with rows kept
+        for (int r = height - 1; r >= 0; r--) {
+            int[] row = keptRows.pollLast();
             if (row != null) {
-                tmp[i] = row;
+                updatedMatrix[r] = row;
             } else {
                 break;
             }
         }
-        int scoreBonus = 50 * clearedRows.size() * clearedRows.size();
-        return new RowClearResult(clearedRows.size(), tmp, scoreBonus);
+
+        // Scoring formula: N² * 50 encourages clearing multiple rows at once
+        int rowsCleared = clearedRowIndices.size();
+        int pointsEarned = 50 * rowsCleared * rowsCleared;
+
+        return new RowClearResult(rowsCleared, updatedMatrix, pointsEarned);
     }
 
-    public static List<int[][]> deepCopyList(List<int[][]> list){
-        return list.stream().map(MatrixOperations::copy).collect(Collectors.toList());
+    /**
+     * Deep copies a list of matrices.
+     *
+     * @param list the list to deep copy
+     * @return a new list containing deep-copied matrices
+     */
+    public static List<int[][]> deepCopyList(List<int[][]> list) {
+        return list.stream()
+                .map(MatrixOperations::copy)
+                .collect(Collectors.toList());
     }
-
 }
