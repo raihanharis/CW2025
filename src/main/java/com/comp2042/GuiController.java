@@ -22,7 +22,6 @@ import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.scene.text.Font;
 
-
 /**
  * Handles all UI-related tasks for the Tetris game, including:
  * - Rendering the board and active brick
@@ -62,9 +61,6 @@ public class GuiController implements Initializable {
     private final BooleanProperty isPause = new SimpleBooleanProperty(false);
     private final BooleanProperty isGameOver = new SimpleBooleanProperty(false);
 
-    /**
-     * Initializes the GUI, loads fonts, sets input handlers, and prepares UI components.
-     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         FontLoader.loadDigitalFont();
@@ -83,38 +79,69 @@ public class GuiController implements Initializable {
     }
 
     /**
-     * Handles keyboard events related to movement, rotation, and restarting the game.
+     * Handles keyboard inputs such as movement, rotation, pause, and restart.
      */
     private void handleKeyPress(KeyEvent keyEvent) {
-        if (!isPause.get() && !isGameOver.get()) {
+        KeyCode code = keyEvent.getCode();
 
-            KeyCode code = keyEvent.getCode();
+        // --- Global Key Shortcuts ---
 
-            switch (code) {
-                case LEFT, A -> refreshBrick(eventListener.onLeftEvent(
-                        new MoveEvent(EventType.LEFT, EventSource.USER)));
-
-                case RIGHT, D -> refreshBrick(eventListener.onRightEvent(
-                        new MoveEvent(EventType.RIGHT, EventSource.USER)));
-
-                case UP, W -> refreshBrick(eventListener.onRotateEvent(
-                        new MoveEvent(EventType.ROTATE, EventSource.USER)));
-
-                case DOWN, S -> moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
-            }
-
-            keyEvent.consume();
-        }
-
-        if (keyEvent.getCode() == KeyCode.N) {
+        // Restart game (R only)
+        if (code == KeyCode.R) {
             newGame(null);
             keyEvent.consume();
+            return;
         }
+
+        // Pause / Unpause (P)
+        if (code == KeyCode.P) {
+            togglePause();
+            keyEvent.consume();
+            return;
+        }
+
+        // Ignore movement keys if paused or game over
+        if (isPause.get() || isGameOver.get()) {
+            return;
+        }
+
+        // --- Movement / Rotation Inputs ---
+        switch (code) {
+            case LEFT, A -> refreshBrick(eventListener.onLeftEvent(
+                    new MoveEvent(EventType.LEFT, EventSource.USER)));
+
+            case RIGHT, D -> refreshBrick(eventListener.onRightEvent(
+                    new MoveEvent(EventType.RIGHT, EventSource.USER)));
+
+            case UP, W -> refreshBrick(eventListener.onRotateEvent(
+                    new MoveEvent(EventType.ROTATE, EventSource.USER)));
+
+            case DOWN, S -> moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
+        }
+
+        keyEvent.consume();
     }
 
     /**
-     * Creates the game view grid and prepares rendering of both board background and active brick.
+     * Toggles the pause state of the game.
      */
+    private void togglePause() {
+        if (isPause.get()) {
+            // Resume
+            isPause.set(false);
+            if (timeLine != null) {
+                timeLine.play();
+            }
+        } else {
+            // Pause
+            isPause.set(true);
+            if (timeLine != null) {
+                timeLine.stop();
+            }
+        }
+        gamePanel.requestFocus();
+    }
+
     public void initGameView(int[][] boardMatrix, ViewData brick) {
 
         // --- Create background rectangle matrix ---
@@ -129,7 +156,7 @@ public class GuiController implements Initializable {
             }
         }
 
-        // --- Create active brick display matrix ---
+        // --- Create active brick rectangles ---
         int[][] shape = brick.getBrickData();
         rectangles = new Rectangle[shape.length][shape[0].length];
 
@@ -144,7 +171,7 @@ public class GuiController implements Initializable {
 
         updateBrickPosition(brick);
 
-        // --- Setup automatic brick falling ---
+        // --- Setup automatic downward movement ---
         timeLine = new Timeline(new KeyFrame(
                 Duration.millis(400),
                 ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
@@ -153,9 +180,6 @@ public class GuiController implements Initializable {
         timeLine.play();
     }
 
-    /**
-     * Maps block values to colors used for rendering.
-     */
     private Paint getFillColor(int value) {
         return switch (value) {
             case 0 -> Color.TRANSPARENT;
@@ -170,9 +194,6 @@ public class GuiController implements Initializable {
         };
     }
 
-    /**
-     * Updates the on-screen position of the active brick.
-     */
     private void updateBrickPosition(ViewData brick) {
         brickPanel.setLayoutX(
                 gamePanel.getLayoutX() +
@@ -183,9 +204,6 @@ public class GuiController implements Initializable {
                         brick.getyPosition() * (brickPanel.getHgap() + BRICK_SIZE));
     }
 
-    /**
-     * Refreshes the display of the active falling brick after a move.
-     */
     private void refreshBrick(ViewData brick) {
         if (!isPause.get()) {
             updateBrickPosition(brick);
@@ -199,9 +217,6 @@ public class GuiController implements Initializable {
         }
     }
 
-    /**
-     * Redraws the game background after merging or clearing rows.
-     */
     public void refreshGameBackground(int[][] board) {
         for (int row = 2; row < board.length; row++) {
             for (int col = 0; col < board[row].length; col++) {
@@ -210,16 +225,12 @@ public class GuiController implements Initializable {
         }
     }
 
-    /** Helper to apply color and rounded edges to rectangles. */
     private void setRectangleData(int color, Rectangle rect) {
         rect.setFill(getFillColor(color));
         rect.setArcHeight(9);
         rect.setArcWidth(9);
     }
 
-    /**
-     * Moves the brick downward and handles scoring notifications.
-     */
     private void moveDown(MoveEvent event) {
         if (!isPause.get()) {
             DownData result = eventListener.onDownEvent(event);
@@ -237,22 +248,18 @@ public class GuiController implements Initializable {
         gamePanel.requestFocus();
     }
 
-    /** Assigns the event listener used to forward user actions. */
     public void setEventListener(InputEventListener eventListener) {
         this.eventListener = eventListener;
     }
 
-    /** Allows score to be bound to UI labels. */
     public void bindScore(IntegerProperty property) { }
 
-    /** Stops the game and shows the Game Over panel. */
     public void gameOver() {
         timeLine.stop();
         gameOverPanel.setVisible(true);
         isGameOver.set(true);
     }
 
-    /** Restarts the game, resets the board and timers. */
     public void newGame(ActionEvent event) {
         timeLine.stop();
         gameOverPanel.setVisible(false);
@@ -263,9 +270,9 @@ public class GuiController implements Initializable {
         isGameOver.set(false);
     }
 
-    /** Handles pause button (placeholder for actual future pause). */
+    /** Pause button in FXML now actually toggles pause. */
     public void pauseGame(ActionEvent event) {
-        gamePanel.requestFocus();
+        togglePause();
     }
 }
 
