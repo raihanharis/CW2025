@@ -23,39 +23,21 @@ import javafx.event.ActionEvent;
 import javafx.scene.text.Font;
 
 /**
- * Handles all UI-related tasks for the Tetris game, including:
- * - Rendering the board and active brick
- * - Responding to keyboard input
- * - Managing animations and notifications
- * - Handling pause and game-over states
+ * Handles all UI-related tasks for the Tetris game.
+ * Includes input, rendering, notifications, pause, restart, and hard drop.
  */
 public class GuiController implements Initializable {
 
-    /** Size in pixels for each board tile. */
     private static final int BRICK_SIZE = 20;
 
-    @FXML
-    private GridPane gamePanel;
+    @FXML private GridPane gamePanel;
+    @FXML private Group groupNotification;
+    @FXML private GridPane brickPanel;
+    @FXML private GameOverPanel gameOverPanel;
 
-    @FXML
-    private Group groupNotification;
-
-    @FXML
-    private GridPane brickPanel;
-
-    @FXML
-    private GameOverPanel gameOverPanel;
-
-    /** The 2D array of rectangles representing the game background tiles. */
     private Rectangle[][] displayMatrix;
-
-    /** The active falling brick's rectangles. */
     private Rectangle[][] rectangles;
-
-    /** Listener for forwarding input events to game logic. */
     private InputEventListener eventListener;
-
-    /** Timeline for automatic downward movement of the brick. */
     private Timeline timeLine;
 
     private final BooleanProperty isPause = new SimpleBooleanProperty(false);
@@ -79,14 +61,12 @@ public class GuiController implements Initializable {
     }
 
     /**
-     * Handles keyboard inputs such as movement, rotation, pause, and restart.
+     * Handles keyboard input including movement, rotation, pause, restart, and hard drop.
      */
     private void handleKeyPress(KeyEvent keyEvent) {
         KeyCode code = keyEvent.getCode();
 
-        // --- Global Key Shortcuts ---
-
-        // Restart game (R only)
+        // Restart game (R)
         if (code == KeyCode.R) {
             newGame(null);
             keyEvent.consume();
@@ -100,12 +80,17 @@ public class GuiController implements Initializable {
             return;
         }
 
-        // Ignore movement keys if paused or game over
-        if (isPause.get() || isGameOver.get()) {
+        // Hard Drop (SPACE)
+        if (code == KeyCode.SPACE && !isPause.get() && !isGameOver.get()) {
+            performHardDrop();
+            keyEvent.consume();
             return;
         }
 
-        // --- Movement / Rotation Inputs ---
+        // Prevent movement while paused or game over
+        if (isPause.get() || isGameOver.get()) return;
+
+        // Movement / rotation
         switch (code) {
             case LEFT, A -> refreshBrick(eventListener.onLeftEvent(
                     new MoveEvent(EventType.LEFT, EventSource.USER)));
@@ -123,40 +108,52 @@ public class GuiController implements Initializable {
     }
 
     /**
-     * Toggles the pause state of the game.
+     * Performs the hard drop (SPACE key).
+     */
+    private void performHardDrop() {
+        DownData result = eventListener.onHardDrop();
+
+        if (result.getClearRow() != null && result.getClearRow().getRowsCleared() > 0) {
+            NotificationPanel notification =
+                    new NotificationPanel("+" + result.getClearRow().getPointsEarned());
+            groupNotification.getChildren().add(notification);
+            notification.showScore(groupNotification.getChildren());
+        }
+
+        refreshBrick(result.getViewData());
+        gamePanel.requestFocus();
+    }
+
+    /**
+     * Toggles pause state.
      */
     private void togglePause() {
         if (isPause.get()) {
-            // Resume
             isPause.set(false);
-            if (timeLine != null) {
-                timeLine.play();
-            }
+            if (timeLine != null) timeLine.play();
         } else {
-            // Pause
             isPause.set(true);
-            if (timeLine != null) {
-                timeLine.stop();
-            }
+            if (timeLine != null) timeLine.stop();
         }
         gamePanel.requestFocus();
     }
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
 
-        // --- Create background rectangle matrix ---
+        // Background tiles
         displayMatrix = new Rectangle[boardMatrix.length][boardMatrix[0].length];
 
         for (int row = 2; row < boardMatrix.length; row++) {
             for (int col = 0; col < boardMatrix[row].length; col++) {
                 Rectangle r = new Rectangle(BRICK_SIZE, BRICK_SIZE);
                 r.setFill(Color.TRANSPARENT);
+
                 displayMatrix[row][col] = r;
                 gamePanel.add(r, col, row - 2);
             }
         }
 
-        // --- Create active brick rectangles ---
+        // Active brick
         int[][] shape = brick.getBrickData();
         rectangles = new Rectangle[shape.length][shape[0].length];
 
@@ -164,6 +161,7 @@ public class GuiController implements Initializable {
             for (int col = 0; col < shape[row].length; col++) {
                 Rectangle r = new Rectangle(BRICK_SIZE, BRICK_SIZE);
                 r.setFill(getFillColor(shape[row][col]));
+
                 rectangles[row][col] = r;
                 brickPanel.add(r, col, row);
             }
@@ -171,7 +169,7 @@ public class GuiController implements Initializable {
 
         updateBrickPosition(brick);
 
-        // --- Setup automatic downward movement ---
+        // Auto-fall
         timeLine = new Timeline(new KeyFrame(
                 Duration.millis(400),
                 ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
@@ -263,28 +261,33 @@ public class GuiController implements Initializable {
     public void newGame(ActionEvent event) {
         timeLine.stop();
         gameOverPanel.setVisible(false);
+
         eventListener.createNewGame();
+
+        refreshGameBackground(eventListener.onDownEvent(
+                new MoveEvent(EventType.DOWN, EventSource.THREAD)
+        ).getViewData().getBrickData());
+
         gamePanel.requestFocus();
         timeLine.play();
+
         isPause.set(false);
         isGameOver.set(false);
     }
 
-    /** Pause button in FXML now actually toggles pause. */
     public void pauseGame(ActionEvent event) {
         togglePause();
     }
 }
 
-/**
- * Utility class to load the custom font.
- */
+/** Utility to load custom font. */
 class FontLoader {
     public static void loadDigitalFont() {
         try {
             Font.loadFont(
                     FontLoader.class.getClassLoader()
-                            .getResource("digital.ttf").toExternalForm(), 38);
-        } catch (Exception ignored) { }
+                            .getResource("digital.ttf").toExternalForm(), 38
+            );
+        } catch (Exception ignored) {}
     }
 }

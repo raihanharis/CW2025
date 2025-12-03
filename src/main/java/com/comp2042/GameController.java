@@ -5,7 +5,7 @@ package com.comp2042;
  * the model (Board) and the view (GuiController).
  *
  * Responsibilities:
- * - Respond to user input events (left, right, rotate, down).
+ * - Respond to user input events (left, right, rotate, down, hard drop).
  * - Update the board state and score accordingly.
  * - Notify the GUI when the game view must update.
  * - Detect and handle game-over conditions.
@@ -37,9 +37,6 @@ public class GameController implements InputEventListener {
      * Handles the "down" event. If the brick cannot move further down,
      * merges it into the background, clears rows, updates score, and
      * spawns a new brick.
-     *
-     * @param event move event information
-     * @return updated DownData showing the result of the action
      */
     @Override
     public DownData onDownEvent(MoveEvent event) {
@@ -47,17 +44,15 @@ public class GameController implements InputEventListener {
         RowClearResult rowClearResult = null;
 
         if (!canMoveDown) {
-
-            // Merge brick into background and clear rows if needed
             board.mergeBrickToBackground();
             rowClearResult = board.clearRows();
 
-            // Award points for cleared rows
+            // Add score for cleared rows
             if (rowClearResult.getRowsCleared() > 0) {
                 board.getScore().add(rowClearResult.getPointsEarned());
             }
 
-            // Spawn new brick — if blocked, game is over
+            // New brick, check game over
             if (board.createNewBrick()) {
                 guiController.gameOver();
             }
@@ -65,7 +60,7 @@ public class GameController implements InputEventListener {
             guiController.refreshGameBackground(board.getBoardMatrix());
 
         } else {
-            // User manually accelerated the brick downward
+            // Soft drop (user presses DOWN)
             if (event.getEventSource() == EventSource.USER) {
                 board.getScore().add(1);
             }
@@ -75,35 +70,59 @@ public class GameController implements InputEventListener {
     }
 
     /**
-     * Handles left movement by the player.
+     * HARD DROP — instantly drop the current brick to its lowest position.
+     * Called when SPACE is pressed.
      */
+    @Override
+    public DownData onHardDrop() {
+        int dropDistance = 0;
+        RowClearResult rowClearResult = null;
+
+        // Move brick down repeatedly until blocked
+        while (board.moveBrickDown()) {
+            dropDistance++;
+        }
+
+        // Add hard drop score bonus (2 points per tile dropped)
+        board.getScore().add(dropDistance * 2);
+
+        // Merge to background
+        board.mergeBrickToBackground();
+
+        // Clear rows
+        rowClearResult = board.clearRows();
+        if (rowClearResult.getRowsCleared() > 0) {
+            board.getScore().add(rowClearResult.getPointsEarned());
+        }
+
+        // Spawn new brick
+        if (board.createNewBrick()) {
+            guiController.gameOver();
+        }
+
+        guiController.refreshGameBackground(board.getBoardMatrix());
+
+        return new DownData(rowClearResult, board.getViewData());
+    }
+
     @Override
     public ViewData onLeftEvent(MoveEvent event) {
         board.moveBrickLeft();
         return board.getViewData();
     }
 
-    /**
-     * Handles right movement by the player.
-     */
     @Override
     public ViewData onRightEvent(MoveEvent event) {
         board.moveBrickRight();
         return board.getViewData();
     }
 
-    /**
-     * Handles rotation input.
-     */
     @Override
     public ViewData onRotateEvent(MoveEvent event) {
         board.rotateLeftBrick();
         return board.getViewData();
     }
 
-    /**
-     * Resets the game to a fresh state.
-     */
     @Override
     public void createNewGame() {
         board.newGame();
