@@ -5,122 +5,120 @@ package com.comp2042;
  * the model (Board) and the view (GuiController).
  *
  * Responsibilities:
- * - Respond to user input events (left, right, rotate, down, hard drop).
- * - Update the board state and score accordingly.
- * - Notify the GUI when the game view must update.
- * - Detect and handle game-over conditions.
+ * - Respond to user input events (left, right, rotate, down, hard drop)
+ * - Update board state and scoring
+ * - Notify the GUI with updated ViewData
+ * - Detect and handle game-over
  */
 public class GameController implements InputEventListener {
 
-    /** The main game board containing brick states, score, and logic. */
     private final Board board = new SimpleBoard(25, 10);
-
-    /** Handles updates to the graphical user interface. */
     private final GuiController guiController;
 
-    /**
-     * Creates a GameController and links it to a GUI controller.
-     *
-     * @param guiController the GUI controller to communicate with
-     */
     public GameController(GuiController guiController) {
         this.guiController = guiController;
 
-        board.createNewBrick(); // spawn first brick
+        board.createNewBrick(); // first brick
 
         guiController.setEventListener(this);
-        guiController.initGameView(board.getBoardMatrix(), board.getViewData());
+        guiController.initGameView(board.getBoardMatrix(), buildViewData());
         guiController.bindScore(board.getScore().scoreProperty());
     }
 
     /**
-     * Handles the "down" event. If the brick cannot move further down,
-     * merges it into the background, clears rows, updates score, and
-     * spawns a new brick.
+     * Creates a ViewData package containing everything the GUI needs.
      */
+    private ViewData buildViewData() {
+        return new ViewData(
+                board.getViewData().getBrickData(),                 // active brick shape
+                board.getViewData().getxPosition(),                 // x pos
+                board.getViewData().getyPosition(),                 // y pos
+                board.getViewData().getNextBrickData(),             // next preview
+                board.getBoardMatrix()                              // board background (NEW)
+        );
+    }
+
     @Override
     public DownData onDownEvent(MoveEvent event) {
         boolean canMoveDown = board.moveBrickDown();
         RowClearResult rowClearResult = null;
 
         if (!canMoveDown) {
+
             board.mergeBrickToBackground();
             rowClearResult = board.clearRows();
 
-            // Add score for cleared rows
+            // award row-clear points
             if (rowClearResult.getRowsCleared() > 0) {
                 board.getScore().add(rowClearResult.getPointsEarned());
             }
 
-            // New brick, check game over
+            // new brick required
             if (board.createNewBrick()) {
                 guiController.gameOver();
             }
 
+            // update background
             guiController.refreshGameBackground(board.getBoardMatrix());
-
         } else {
-            // Soft drop (user presses DOWN)
+            // soft drop score for user input
             if (event.getEventSource() == EventSource.USER) {
                 board.getScore().add(1);
             }
         }
 
-        return new DownData(rowClearResult, board.getViewData());
+        return new DownData(rowClearResult, buildViewData());
     }
 
     /**
-     * HARD DROP — instantly drop the current brick to its lowest position.
-     * Called when SPACE is pressed.
+     * HARD DROP: instantly drop as far as possible.
      */
     @Override
     public DownData onHardDrop() {
         int dropDistance = 0;
-        RowClearResult rowClearResult = null;
 
-        // Move brick down repeatedly until blocked
+        // move down repeatedly
         while (board.moveBrickDown()) {
             dropDistance++;
         }
 
-        // Add hard drop score bonus (2 points per tile dropped)
+        // bonus score: 2 per tile dropped
         board.getScore().add(dropDistance * 2);
 
-        // Merge to background
+        // merge and clear
         board.mergeBrickToBackground();
+        RowClearResult result = board.clearRows();
 
-        // Clear rows
-        rowClearResult = board.clearRows();
-        if (rowClearResult.getRowsCleared() > 0) {
-            board.getScore().add(rowClearResult.getPointsEarned());
+        if (result.getRowsCleared() > 0) {
+            board.getScore().add(result.getPointsEarned());
         }
 
-        // Spawn new brick
+        // attempt new brick
         if (board.createNewBrick()) {
             guiController.gameOver();
         }
 
         guiController.refreshGameBackground(board.getBoardMatrix());
 
-        return new DownData(rowClearResult, board.getViewData());
+        return new DownData(result, buildViewData());
     }
 
     @Override
     public ViewData onLeftEvent(MoveEvent event) {
         board.moveBrickLeft();
-        return board.getViewData();
+        return buildViewData();
     }
 
     @Override
     public ViewData onRightEvent(MoveEvent event) {
         board.moveBrickRight();
-        return board.getViewData();
+        return buildViewData();
     }
 
     @Override
     public ViewData onRotateEvent(MoveEvent event) {
         board.rotateLeftBrick();
-        return board.getViewData();
+        return buildViewData();
     }
 
     @Override
