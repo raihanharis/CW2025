@@ -28,6 +28,7 @@ public class GameController implements InputEventListener {
 
             if (rowClearResult.getRowsCleared() > 0) {
                 board.getScore().add(rowClearResult.getPointsEarned());
+                gui.updateLinesCleared(rowClearResult.getRowsCleared());
             }
 
             if (board.createNewBrick()) {
@@ -74,6 +75,7 @@ public class GameController implements InputEventListener {
         RowClearResult result = board.clearRows();
         if (result.getRowsCleared() > 0) {
             board.getScore().add(result.getPointsEarned());
+            gui.updateLinesCleared(result.getRowsCleared());
         }
 
         if (board.createNewBrick()) {

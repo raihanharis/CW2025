@@ -24,11 +24,11 @@ public class Main extends Application {
         new GameController(gui);
 
         primaryStage.setTitle("Tetris");
-        Scene scene = new Scene(root, 450, 580);
-        scene.setFill(javafx.scene.paint.Color.BLACK);
+        Scene scene = new Scene(root, 580, 620);
+        scene.setFill(javafx.scene.paint.Color.web("#0a0a0a"));
         primaryStage.setScene(scene);
-        primaryStage.setMinWidth(300);
-        primaryStage.setMinHeight(400);
+        primaryStage.setMinWidth(500);
+        primaryStage.setMinHeight(550);
         primaryStage.show();
         
         // Request focus for keyboard input

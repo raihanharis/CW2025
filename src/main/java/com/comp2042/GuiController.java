@@ -1,13 +1,20 @@
 package com.comp2042;
 
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
+import javafx.animation.Animation;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.effect.Glow;
+import javafx.scene.effect.DropShadow;
+import javafx.util.Duration;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -18,7 +25,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
-import javafx.util.Duration;
 import javafx.scene.text.Font;
 import javafx.event.ActionEvent;
 
@@ -42,13 +48,22 @@ public class GuiController implements Initializable {
 
     @FXML private StackPane rootPane;
     @FXML private HBox gameContainer;
+    @FXML private VBox leftPanel;
     @FXML private GridPane gamePanel;
     @FXML private VBox nextPanel;
     @FXML private Label nextLabel;
     @FXML private GridPane brickPanel;
     @FXML private Group groupNotification;
     @FXML private VBox pauseOverlay;
+    @FXML private Label pauseLabel;
     @FXML private GameOverPanel gameOverPanel;
+    
+    // Left panel controls
+    @FXML private Label scoreLabel;
+    @FXML private Label levelLabel;
+    @FXML private Label linesLabel;
+    @FXML private Button restartButton;
+    @FXML private Button pauseButton;
 
     private Rectangle[][] boardTiles;
     private Rectangle[][] activeBrickTiles;
@@ -57,11 +72,21 @@ public class GuiController implements Initializable {
 
     private InputEventListener eventListener;
     private Timeline timeline;
+    
+    // Pause animations
+    private FadeTransition pauseFadeIn;
+    private FadeTransition pauseFadeOut;
+    private Timeline pausePulseAnimation;
 
     private final BooleanProperty isPause = new SimpleBooleanProperty(false);
     private final BooleanProperty isGameOver = new SimpleBooleanProperty(false);
     
     private ViewData lastViewData;
+    
+    // Game stats
+    private int totalLinesCleared = 0;
+    private int currentLevel = 1;
+    private static final int LINES_PER_LEVEL = 10;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -73,9 +98,126 @@ public class GuiController implements Initializable {
         
         gameOverPanel.setVisible(false);
         
+        // Make pause overlay non-blocking for input
+        if (pauseOverlay != null) {
+            pauseOverlay.setMouseTransparent(true);
+        }
+        
+        // Initialize pause animations
+        initializePauseAnimations();
+        
+        // Initialize button animations
+        initializeButtonAnimations();
+        
         // Add resize listener for scaling
         rootPane.widthProperty().addListener((obs, oldVal, newVal) -> handleResize());
         rootPane.heightProperty().addListener((obs, oldVal, newVal) -> handleResize());
+    }
+    
+    /**
+     * Initializes hover and press animations for game buttons.
+     */
+    private void initializeButtonAnimations() {
+        if (restartButton != null) {
+            setupButtonAnimations(restartButton, "#00d4ff");
+        }
+        if (pauseButton != null) {
+            setupButtonAnimations(pauseButton, "#00ff88");
+        }
+    }
+    
+    /**
+     * Sets up hover and press animations for a button.
+     * @param button The button to animate
+     * @param glowColor The neon glow color (hex format)
+     */
+    private void setupButtonAnimations(Button button, String glowColor) {
+        // Hover scale animation (1.0 -> 1.05)
+        ScaleTransition hoverScale = new ScaleTransition(Duration.millis(150), button);
+        hoverScale.setToX(1.05);
+        hoverScale.setToY(1.05);
+        
+        // Unhover scale animation (1.05 -> 1.0)
+        ScaleTransition unhoverScale = new ScaleTransition(Duration.millis(150), button);
+        unhoverScale.setToX(1.0);
+        unhoverScale.setToY(1.0);
+        
+        // Press scale animation (1.05 -> 0.95)
+        ScaleTransition pressScale = new ScaleTransition(Duration.millis(100), button);
+        pressScale.setToX(0.95);
+        pressScale.setToY(0.95);
+        
+        // Release scale animation (0.95 -> 1.05)
+        ScaleTransition releaseScale = new ScaleTransition(Duration.millis(100), button);
+        releaseScale.setToX(1.05);
+        releaseScale.setToY(1.05);
+        
+        // Enhanced glow effect for hover
+        DropShadow hoverGlow = new DropShadow();
+        hoverGlow.setColor(javafx.scene.paint.Color.web(glowColor));
+        hoverGlow.setRadius(20);
+        hoverGlow.setSpread(0.8);
+        
+        DropShadow normalGlow = new DropShadow();
+        normalGlow.setColor(javafx.scene.paint.Color.web(glowColor));
+        normalGlow.setRadius(15);
+        normalGlow.setSpread(0.6);
+        
+        // Hover event handlers
+        button.setOnMouseEntered(e -> {
+            hoverScale.play();
+            button.setEffect(hoverGlow);
+        });
+        
+        button.setOnMouseExited(e -> {
+            unhoverScale.play();
+            button.setEffect(normalGlow);
+        });
+        
+        // Press event handlers
+        button.setOnMousePressed(e -> {
+            pressScale.play();
+        });
+        
+        button.setOnMouseReleased(e -> {
+            releaseScale.play();
+        });
+        
+        // Initial glow effect
+        button.setEffect(normalGlow);
+    }
+    
+    /**
+     * Initializes the pause overlay animations: fade in/out and pulsing glow effect.
+     */
+    private void initializePauseAnimations() {
+        if (pauseOverlay == null || pauseLabel == null) return;
+        
+        // Fade in animation (300ms)
+        pauseFadeIn = new FadeTransition(Duration.millis(300), pauseOverlay);
+        pauseFadeIn.setFromValue(0.0);
+        pauseFadeIn.setToValue(1.0);
+        
+        // Fade out animation (300ms)
+        pauseFadeOut = new FadeTransition(Duration.millis(300), pauseOverlay);
+        pauseFadeOut.setFromValue(1.0);
+        pauseFadeOut.setToValue(0.0);
+        pauseFadeOut.setOnFinished(e -> pauseOverlay.setVisible(false));
+        
+        // Pulsing glow effect for the pause label
+        Glow glow = new Glow();
+        pauseLabel.setEffect(glow);
+        
+        pausePulseAnimation = new Timeline(
+            new KeyFrame(Duration.ZERO, e -> glow.setLevel(0.3)),
+            new KeyFrame(Duration.millis(1000), e -> glow.setLevel(0.8)),
+            new KeyFrame(Duration.millis(2000), e -> glow.setLevel(0.3))
+        );
+        pausePulseAnimation.setCycleCount(Animation.INDEFINITE);
+        
+        // Initially invisible
+        pauseOverlay.setOpacity(0.0);
+        pauseOverlay.setVisible(false);
     }
     
     private void handleResize() {
@@ -369,23 +511,124 @@ public class GuiController implements Initializable {
 
     private void togglePause() {
         if (isPause.get()) {
-            // Resume game
+            // Resume game - fade out animation
             isPause.set(false);
-            pauseOverlay.setVisible(false);
+            fadeOutPauseOverlay();
             timeline.play();
         } else {
-            // Pause game
+            // Pause game - fade in animation
             isPause.set(true);
-            pauseOverlay.setVisible(true);
+            fadeInPauseOverlay();
             timeline.stop();
         }
+        updatePauseButtonText();
+    }
+    
+    /**
+     * Fades in the pause overlay with smooth animation.
+     */
+    private void fadeInPauseOverlay() {
+        if (pauseOverlay == null) return;
+        
+        pauseOverlay.setVisible(true);
+        pauseOverlay.setOpacity(0.0);
+        
+        // Stop any ongoing fade out
+        if (pauseFadeOut.getStatus() == Animation.Status.RUNNING) {
+            pauseFadeOut.stop();
+        }
+        
+        // Start fade in
+        pauseFadeIn.play();
+        
+        // Start pulsing glow animation
+        if (pausePulseAnimation != null) {
+            pausePulseAnimation.play();
+        }
+    }
+    
+    /**
+     * Fades out the pause overlay with smooth animation.
+     */
+    private void fadeOutPauseOverlay() {
+        if (pauseOverlay == null) return;
+        
+        // Stop pulsing animation
+        if (pausePulseAnimation != null) {
+            pausePulseAnimation.stop();
+        }
+        
+        // Stop any ongoing fade in
+        if (pauseFadeIn.getStatus() == Animation.Status.RUNNING) {
+            pauseFadeIn.stop();
+        }
+        
+        // Start fade out
+        pauseFadeOut.play();
     }
 
     public void setEventListener(InputEventListener listener) {
         this.eventListener = listener;
     }
 
-    public void bindScore(IntegerProperty property) {}
+    public void bindScore(IntegerProperty property) {
+        if (scoreLabel != null && property != null) {
+            scoreLabel.textProperty().bind(property.asString());
+        }
+    }
+    
+    /**
+     * Updates the lines cleared count and calculates level.
+     */
+    public void updateLinesCleared(int linesJustCleared) {
+        if (linesJustCleared > 0) {
+            totalLinesCleared += linesJustCleared;
+            currentLevel = 1 + (totalLinesCleared / LINES_PER_LEVEL);
+            
+            if (linesLabel != null) {
+                linesLabel.setText(String.valueOf(totalLinesCleared));
+            }
+            if (levelLabel != null) {
+                levelLabel.setText(String.valueOf(currentLevel));
+            }
+            
+            // Increase game speed with level
+            updateGameSpeed();
+        }
+    }
+    
+    /**
+     * Updates the game speed based on current level.
+     */
+    private void updateGameSpeed() {
+        if (timeline != null) {
+            // Base speed 400ms, decrease by 25ms per level, minimum 100ms
+            int speed = Math.max(100, 400 - (currentLevel - 1) * 25);
+            timeline.stop();
+            timeline.getKeyFrames().clear();
+            timeline.getKeyFrames().add(new KeyFrame(
+                    Duration.millis(speed),
+                    e -> handleDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
+            ));
+            if (!isPause.get() && !isGameOver.get()) {
+                timeline.play();
+            }
+        }
+    }
+    
+    /**
+     * Resets game statistics for a new game.
+     */
+    private void resetStats() {
+        totalLinesCleared = 0;
+        currentLevel = 1;
+        if (linesLabel != null) {
+            linesLabel.setText("0");
+        }
+        if (levelLabel != null) {
+            levelLabel.setText("1");
+        }
+    }
 
     public void gameOver() {
         isGameOver.set(true);
@@ -397,9 +640,64 @@ public class GuiController implements Initializable {
         isGameOver.set(false);
         isPause.set(false);
         gameOverPanel.setVisible(false);
-        pauseOverlay.setVisible(false);
+        
+        // Stop and hide pause overlay immediately
+        if (pausePulseAnimation != null) {
+            pausePulseAnimation.stop();
+        }
+        if (pauseOverlay != null) {
+            pauseOverlay.setVisible(false);
+            pauseOverlay.setOpacity(0.0);
+        }
+        
+        updatePauseButtonText();
+        resetStats();
+        
+        // Reset game speed to default
+        if (timeline != null) {
+            timeline.stop();
+            timeline.getKeyFrames().clear();
+            timeline.getKeyFrames().add(new KeyFrame(
+                    Duration.millis(400),
+                    e -> handleDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
+            ));
+        }
+        
         eventListener.createNewGame();
+        
+        if (timeline != null && !isPause.get()) {
+            timeline.play();
+        }
+        
         rootPane.requestFocus();
+    }
+    
+    /**
+     * Button handler for Restart button click.
+     */
+    @FXML
+    private void onRestartClick(ActionEvent event) {
+        newGame(event);
+    }
+    
+    /**
+     * Button handler for Pause button click.
+     */
+    @FXML
+    private void onPauseClick(ActionEvent event) {
+        if (!isGameOver.get()) {
+            togglePause();
+        }
+        rootPane.requestFocus();
+    }
+    
+    /**
+     * Updates the pause button text based on current state.
+     */
+    private void updatePauseButtonText() {
+        if (pauseButton != null) {
+            pauseButton.setText(isPause.get() ? "▶ RESUME" : "⏸ PAUSE");
+        }
     }
 
     static class FontLoader {

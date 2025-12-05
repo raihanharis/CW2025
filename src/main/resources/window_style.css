@@ -73,3 +73,88 @@
     -fx-fill: yellow;
     -fx-text-fill: yellow;
 }
+
+/* ============================================
+   PROFESSIONAL GAME-STYLED BUTTONS
+   ============================================ */
+
+/* Base button style */
+.game-button {
+    -fx-background-radius: 15px;
+    -fx-border-radius: 15px;
+    -fx-padding: 12 24 12 24;
+    -fx-font-family: "Arial Black", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+}
+
+/* Restart Button - Blue-Cyan Gradient */
+.restart-button {
+    -fx-background-color: linear-gradient(to bottom, #1e90ff, #00bfff, #0080ff);
+    -fx-border-color: #00d4ff;
+    -fx-text-fill: #ffffff;
+}
+
+.restart-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #2da0ff, #10cfff, #0090ff);
+    -fx-border-color: #00ffff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 20, 0.8, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
+}
+
+.restart-button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #1a80ef, #00afef, #0070ef);
+    -fx-border-color: #00c4ef;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 15, 0.6, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.5), 6, 0, 0, 1);
+}
+
+.restart-button:focused {
+    -fx-effect: dropshadow(gaussian, #00d4ff, 25, 1.0, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
+}
+
+/* Pause/Resume Button - Green-Mint Gradient */
+.pause-resume-button {
+    -fx-background-color: linear-gradient(to bottom, #32cd32, #00ff7f, #228b22);
+    -fx-border-color: #00ff88;
+    -fx-text-fill: #ffffff;
+}
+
+.pause-resume-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #42dd42, #10ff8f, #329b32);
+    -fx-border-color: #00ffaa;
+    -fx-effect: dropshadow(gaussian, #00ff88, 20, 0.8, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
+}
+
+.pause-resume-button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #22bd22, #00ef6f, #127b12);
+    -fx-border-color: #00ff78;
+    -fx-effect: dropshadow(gaussian, #00ff88, 15, 0.6, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.5), 6, 0, 0, 1);
+}
+
+.pause-resume-button:focused {
+    -fx-effect: dropshadow(gaussian, #00ff88, 25, 1.0, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
+}
+
+/* ============================================
+   NEXT PREVIEW FRAME
+   ============================================ */
+.next-preview-frame {
+    -fx-background-color: rgba(17, 17, 17, 0.9);
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(100, 200, 255, 0.4);
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(100, 200, 255, 0.3), 10, 0.5, 0, 0);
+}
