@@ -27,6 +27,9 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.event.ActionEvent;
+import javafx.stage.Stage;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -77,6 +80,7 @@ public class GuiController implements Initializable {
     @FXML private Label highScoreValue;
     @FXML private Button restartButton;
     @FXML private Button pauseButton;
+    @FXML private Button mainMenuButton;
 
     private Rectangle[][] boardTiles;
     private Rectangle[][] activeBrickTiles;
@@ -140,6 +144,9 @@ public class GuiController implements Initializable {
         }
         if (pauseButton != null) {
             setupButtonAnimations(pauseButton, "#00ff88");
+        }
+        if (mainMenuButton != null) {
+            setupButtonAnimations(mainMenuButton, "#4cc9f0");
         }
     }
     
@@ -908,6 +915,83 @@ public class GuiController implements Initializable {
             togglePause();
         }
         rootPane.requestFocus();
+    }
+    
+    /**
+     * Handles the Main Menu button click.
+     * Stops the game and returns to the main menu.
+     */
+    @FXML
+    private void onMainMenuClick(ActionEvent event) {
+        // Stop the timeline / pause the game completely
+        if (timeline != null) {
+            timeline.stop();
+        }
+        
+        // Stop pause overlay if visible
+        if (pausePulseAnimation != null) {
+            pausePulseAnimation.stop();
+        }
+        if (pauseOverlay != null) {
+            pauseOverlay.setVisible(false);
+            pauseOverlay.setOpacity(0.0);
+        }
+        
+        // Return to main menu
+        returnToMainMenu();
+        rootPane.requestFocus();
+    }
+    
+    private Stage primaryStage;
+    
+    /**
+     * Sets the primary stage for scene switching.
+     * Called from MainMenuController when starting a game.
+     */
+    public void setPrimaryStage(Stage stage) {
+        this.primaryStage = stage;
+    }
+    
+    /**
+     * Returns to the main menu scene.
+     * Loads mainMenu.fxml and switches the scene.
+     */
+    public void returnToMainMenu() {
+        try {
+            // Stop the timeline / pause the game completely
+            if (timeline != null) {
+                timeline.stop();
+            }
+            
+            // Load the main menu
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/mainMenu.fxml")
+            );
+            
+            javafx.scene.Parent mainMenuRoot = loader.load();
+            
+            // Get the MainMenuController and set the primary stage
+            MainMenuController mainMenuController = loader.getController();
+            if (primaryStage != null) {
+                mainMenuController.setPrimaryStage(primaryStage);
+            }
+            
+            // Create and set the main menu scene
+            javafx.scene.Scene mainMenuScene = new javafx.scene.Scene(mainMenuRoot, 900, 700);
+            mainMenuScene.setFill(javafx.scene.paint.Color.web("#000000"));
+            
+            if (primaryStage != null) {
+                primaryStage.setScene(mainMenuScene);
+                primaryStage.setTitle("Tetris");
+                
+                // Request focus for keyboard input
+                mainMenuRoot.requestFocus();
+            }
+            
+        } catch (java.io.IOException e) {
+            System.err.println("Error loading main menu scene: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     /**

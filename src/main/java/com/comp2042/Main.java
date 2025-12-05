@@ -10,21 +10,20 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
+        // Load the main menu first
         FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/gameLayout.fxml")
+                getClass().getResource("/mainMenu.fxml")
         );
 
         Parent root = loader.load();
 
-        // Get the GUI controller from FXML
-        GuiController gui = loader.getController();
+        // Get the MainMenuController and set the primary stage
+        MainMenuController mainMenuController = loader.getController();
+        mainMenuController.setPrimaryStage(primaryStage);
 
-        // Create the game controller and connect it to GUI
-        new GameController(gui);
-
+        // Create and show the main menu scene
         primaryStage.setTitle("Tetris");
-        Scene scene = new Scene(root, 580, 620);
+        Scene scene = new Scene(root, 900, 700);
         scene.setFill(javafx.scene.paint.Color.web("#000000"));
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(500);

@@ -74,6 +74,12 @@
                         text="⏸ PAUSE"
                         onAction="#onPauseClick"
                         styleClass="game-button pause-resume-button"/>
+                
+                <!-- Main Menu Button -->
+                <Button fx:id="mainMenuButton"
+                        text="🏠 MAIN MENU"
+                        onAction="#onMainMenuClick"
+                        styleClass="game-button main-menu-button"/>
             </VBox>
             
             <!-- BOX 2: CONTROLS PANEL -->
