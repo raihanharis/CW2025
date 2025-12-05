@@ -11,16 +11,16 @@
 <StackPane fx:id="rootPane"
            fx:controller="com.comp2042.GuiController"
            xmlns:fx="http://javafx.com/fxml"
-           style="-fx-background-color: #0a0a0a;">
+           style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000);">
 
     <!-- Main game layout -->
-    <HBox fx:id="gameContainer" alignment="CENTER" spacing="20">
+    <HBox fx:id="gameContainer" alignment="CENTER" spacing="20" style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000);">
         
         <!-- LEFT SIDEBAR - Control Panel (Official Tetris Style) -->
         <VBox fx:id="leftPanel" 
               alignment="TOP_CENTER" 
               spacing="14"
-              style="-fx-background-color: linear-gradient(to bottom, #1a1a2e, #0d0d1a); -fx-padding: 20 15; -fx-background-radius: 10; -fx-min-width: 130;">
+              style="-fx-background-color: linear-gradient(to bottom, #1a1a2e, #0d0d1a); -fx-padding: 20 15; -fx-background-radius: 10; -fx-min-width: 130; -fx-pref-width: 130; -fx-max-width: 130;">
             
             <!-- Title -->
             <Label text="TETRIS" style="-fx-text-fill: #00d4ff; -fx-font-size: 24; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, #00d4ff, 10, 0.5, 0, 0);"/>
@@ -75,33 +75,51 @@
             </VBox>
         </VBox>
         
-        <!-- CENTER: Game Board -->
-        <GridPane fx:id="gamePanel" hgap="1" vgap="1"/>
+        <!-- CENTER: Game Board Container -->
+        <VBox alignment="CENTER" styleClass="playfield-container">
+            <GridPane fx:id="gamePanel" 
+                      hgap="1" 
+                      vgap="1"
+                      styleClass="playfield-grid"/>
+        </VBox>
 
         <!-- RIGHT: Next Preview Panel -->
         <VBox fx:id="nextPanel" 
               alignment="TOP_CENTER" 
               spacing="12"
-              style="-fx-padding: 10;">
+              style="-fx-padding: 30 0; -fx-min-width: 100; -fx-pref-width: 100; -fx-max-width: 100;">
             
-            <!-- NEXT Label - Above the frame -->
+            <!-- NEXT 1 Label - Above the first frame (center-aligned) -->
             <Label fx:id="nextLabel" 
-                   text="NEXT" 
-                   style="-fx-text-fill: #cccccc; -fx-font-size: 14; -fx-font-weight: bold;"/>
+                   text="NEXT 1" 
+                   styleClass="next-title"/>
             
-            <!-- Compact Preview Frame - Only wraps the block grid -->
+            <!-- First Preview Box - Next brick (centered) -->
             <VBox fx:id="nextPreviewFrame"
                   alignment="CENTER"
-                  styleClass="next-preview-frame">
+                  styleClass="next-box">
                 <GridPane fx:id="brickPanel" 
                           hgap="1" 
                           vgap="1"
-                          alignment="CENTER"
-                          maxWidth="Infinity"
-                          maxHeight="Infinity"/>
+                          alignment="CENTER"/>
             </VBox>
             
-            <!-- Notification group stays outside the frame -->
+            <!-- NEXT 2 Label - Above the second frame (center-aligned) -->
+            <Label fx:id="upNextLabel" 
+                   text="NEXT 2" 
+                   styleClass="next-title"/>
+            
+            <!-- Second Preview Box - Next 2 brick (centered) -->
+            <VBox fx:id="nextPreviewFrame2"
+                  alignment="CENTER"
+                  styleClass="next-box">
+                <GridPane fx:id="brickPanel2" 
+                          hgap="1" 
+                          vgap="1"
+                          alignment="CENTER"/>
+            </VBox>
+            
+            <!-- Notification group stays outside the frames -->
             <Group fx:id="groupNotification"/>
         </VBox>
     </HBox>

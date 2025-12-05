@@ -136,6 +136,7 @@ public class SimpleBoard implements Board {
                 currentOffset.x,
                 currentOffset.y,
                 brickGenerator.getNextBrick().getShapeMatrix().get(0),
+                brickGenerator.getNextBrick2().getShapeMatrix().get(0),
                 currentGameMatrix,
                 ghostY
         );

@@ -14,6 +14,24 @@
     -fx-background-color: transparent;
 }
 
+/* ============================================
+   PLAYFIELD CONTAINER (Modern Tetris Style)
+   ============================================ */
+.playfield-container {
+    -fx-alignment: center;
+    -fx-padding: 15;
+}
+
+.playfield-grid {
+    -fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000);
+    -fx-border-color: rgba(50, 50, 80, 0.8);
+    -fx-border-width: 3;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-effect: dropshadow(inner, rgba(100, 150, 255, 0.3), 20, 0.8, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.8), 10, 0, 0, 2);
+}
+
 .nextBrickLabel {
     -fx-font-family: "Let's go Digital";
     -fx-padding: 20px 0 0 0;
@@ -149,19 +167,42 @@
 /* ============================================
    NEXT PREVIEW FRAME
    ============================================ */
-.next-preview-frame {
-    -fx-background-color: rgba(10, 10, 15, 0.95);
-    -fx-padding: 10;
+/* ============================================
+   NEXT PREVIEW LABELS (Identical - Match TETRIS Sidebar Labels)
+   ============================================ */
+.next-title {
+    -fx-text-fill: #6DF9FF;              /* bright cyan - identical color */
+    -fx-font-size: 11px;                  /* same size as TETRIS sidebar labels */
+    -fx-font-weight: bold;                /* same weight as TETRIS sidebar labels */
+    -fx-font-family: 'Arial', sans-serif; /* same font family as TETRIS sidebar labels */
+    -fx-letter-spacing: 1.5px;           /* same tracking as TETRIS sidebar labels */
+    -fx-alignment: center;                /* center-align horizontally above preview box */
+    -fx-text-alignment: center;
+    -fx-padding: 0 0 12 0;                /* identical padding - consistent vertical spacing */
+    -fx-line-spacing: 1.2;                /* same line height */
+    -fx-effect: dropshadow(gaussian, rgba(109, 249, 255, 0.55), 8, 0.5, 0, 0);  /* soft outer glow - no animations */
+}
+
+/* ============================================
+   NEXT PREVIEW BOX (Single Reusable Class - Identical for Both)
+   ============================================ */
+.next-box {
+    -fx-background-color: #0d0f1c;        /* dark background - identical */
+    -fx-padding: 12;                      /* 8-12px internal padding - identical */
     -fx-background-radius: 6;
-    -fx-border-color: rgba(100, 200, 255, 0.6);
-    -fx-border-width: 2.5;
+    -fx-border-color: #65e7ff;            /* neon blue border - identical */
+    -fx-border-width: 2.5;                 /* 2-3px border - identical */
     -fx-border-radius: 6;
-    -fx-effect: dropshadow(gaussian, rgba(100, 200, 255, 0.5), 12, 0.7, 0, 0),
-                dropshadow(gaussian, rgba(0, 0, 0, 0.8), 8, 0, 0, 2);
-    -fx-min-width: 80;
-    -fx-min-height: 80;
-    -fx-pref-width: -1;
-    -fx-pref-height: -1;
+    -fx-effect: dropshadow(gaussian, rgba(101, 231, 255, 0.5), 10, 0.7, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.6), 8, 0, 0, 2);  /* identical drop shadow */
+    /* Fixed identical size - fits any tetromino without cropping */
+    -fx-min-width: 100;
+    -fx-pref-width: 100;
+    -fx-max-width: 100;
+    -fx-min-height: 100;
+    -fx-pref-height: 100;
+    -fx-max-height: 100;
+    -fx-alignment: center;
 }
 
 /* ============================================

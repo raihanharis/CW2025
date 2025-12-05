@@ -25,7 +25,7 @@ public class Main extends Application {
 
         primaryStage.setTitle("Tetris");
         Scene scene = new Scene(root, 580, 620);
-        scene.setFill(javafx.scene.paint.Color.web("#0a0a0a"));
+        scene.setFill(javafx.scene.paint.Color.web("#000000"));
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(500);
         primaryStage.setMinHeight(550);

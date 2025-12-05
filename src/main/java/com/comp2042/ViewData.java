@@ -6,16 +6,18 @@ public final class ViewData {
     private final int xPosition;
     private final int yPosition;
     private final int[][] nextBrickData;
+    private final int[][] nextBrick2Data;
     private final int[][] boardMatrix;
     
     // Ghost piece data
     private final int ghostYPosition;
 
-    public ViewData(int[][] brickData, int xPosition, int yPosition, int[][] nextBrickData, int[][] boardMatrix, int ghostYPosition) {
+    public ViewData(int[][] brickData, int xPosition, int yPosition, int[][] nextBrickData, int[][] nextBrick2Data, int[][] boardMatrix, int ghostYPosition) {
         this.brickData = brickData;
         this.xPosition = xPosition;
         this.yPosition = yPosition;
         this.nextBrickData = nextBrickData;
+        this.nextBrick2Data = nextBrick2Data;
         this.boardMatrix = boardMatrix;
         this.ghostYPosition = ghostYPosition;
     }
@@ -34,6 +36,10 @@ public final class ViewData {
 
     public int[][] getNextBrickData() {
         return MatrixOperations.copy(nextBrickData);
+    }
+    
+    public int[][] getNextBrick2Data() {
+        return MatrixOperations.copy(nextBrick2Data);
     }
 
     public int[][] getBoardMatrix() {

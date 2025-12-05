@@ -44,7 +44,14 @@ public class GuiController implements Initializable {
     private static final int MAX_TILE_SIZE = 35;
     private static final int DEFAULT_TILE_SIZE = 22;
     
+    // Next preview box dimensions (fixed identical size - fits any tetromino)
+    private static final int NEXT_BOX_SIZE = 100;        // Fixed 100x100px for both boxes
+    private static final int NEXT_BOX_PADDING = 12;     // 8-12px padding for both
+    private static final int NEXT_BRICK_TILE_SIZE = 20;  // Fixed 20px brick squares (no scaling)
+    
     private int currentTileSize = DEFAULT_TILE_SIZE;
+    private int nextPreviewTileSize = DEFAULT_TILE_SIZE;
+    private int nextPreview2TileSize = DEFAULT_TILE_SIZE;
 
     @FXML private StackPane rootPane;
     @FXML private HBox gameContainer;
@@ -52,7 +59,11 @@ public class GuiController implements Initializable {
     @FXML private GridPane gamePanel;
     @FXML private VBox nextPanel;
     @FXML private Label nextLabel;
+    @FXML private VBox nextPreviewFrame;
     @FXML private GridPane brickPanel;
+    @FXML private Label upNextLabel;
+    @FXML private VBox nextPreviewFrame2;
+    @FXML private GridPane brickPanel2;
     @FXML private Group groupNotification;
     @FXML private VBox pauseOverlay;
     @FXML private Label pauseLabel;
@@ -69,6 +80,7 @@ public class GuiController implements Initializable {
     private Rectangle[][] activeBrickTiles;
     private Rectangle[][] ghostBrickTiles;  // Ghost piece tiles
     private Rectangle[][] nextBrickTiles;
+    private Rectangle[][] nextBrick2Tiles;  // Second next brick tiles
 
     private InputEventListener eventListener;
     private Timeline timeline;
@@ -97,6 +109,9 @@ public class GuiController implements Initializable {
         rootPane.setOnKeyPressed(this::handleKeyPress);
         
         gameOverPanel.setVisible(false);
+        
+        // Initialize pulsing animations for preview frames
+        setupPreviewAnimations();
         
         // Make pause overlay non-blocking for input
         if (pauseOverlay != null) {
@@ -224,10 +239,12 @@ public class GuiController implements Initializable {
         if (rootPane.getWidth() <= 0 || rootPane.getHeight() <= 0) return;
         
         // Calculate optimal tile size based on available space
-        double availableWidth = rootPane.getWidth() - 120; // Reserve space for NEXT panel
-        double availableHeight = rootPane.getHeight() - 40; // Small margin
+        // Account for fixed-width side panels (130px left + 100px right + spacing)
+        double availableWidth = rootPane.getWidth() - 130 - 100 - 40; // Left panel + Right panel + spacing
+        double availableHeight = rootPane.getHeight() - 60; // Margin for padding and borders
         
-        // Calculate tile size to fit the board
+        // Calculate tile size to fit the board (10 columns × 20 visible rows)
+        // Use Math.min to ensure tiles stay perfectly square
         int tileByWidth = (int) (availableWidth / (BOARD_COLS + 1)); // +1 for gaps
         int tileByHeight = (int) (availableHeight / (VISIBLE_ROWS + 1));
         
@@ -277,20 +294,11 @@ public class GuiController implements Initializable {
             }
         }
         
-        // Resize next brick tiles
-        if (nextBrickTiles != null) {
-            for (int r = 0; r < nextBrickTiles.length; r++) {
-                for (int c = 0; c < nextBrickTiles[r].length; c++) {
-                    if (nextBrickTiles[r][c] != null) {
-                        nextBrickTiles[r][c].setWidth(currentTileSize);
-                        nextBrickTiles[r][c].setHeight(currentTileSize);
-                    }
-                }
-            }
-        }
+        // Next brick tiles use their own size (calculated to fit in fixed box)
+        // Don't resize them here - they're handled separately
         
         // Update label font size
-        nextLabel.setStyle("-fx-text-fill: #888888; -fx-font-size: " + (currentTileSize * 0.6) + ";");
+        // Labels use CSS class styling - no inline styles needed
     }
 
     private void handleKeyPress(KeyEvent event) {
@@ -326,6 +334,9 @@ public class GuiController implements Initializable {
         // Clear existing tiles
         gamePanel.getChildren().clear();
         brickPanel.getChildren().clear();
+        if (brickPanel2 != null) {
+            brickPanel2.getChildren().clear();
+        }
         
         int cols = boardMatrix[0].length;
         boardTiles = new Rectangle[TOTAL_ROWS][cols];
@@ -367,18 +378,60 @@ public class GuiController implements Initializable {
             }
         }
 
-        // Create next brick tiles
+        // Create first next brick tiles with scaling to fit in fixed box
         int[][] next = viewData.getNextBrickData();
         nextBrickTiles = new Rectangle[next.length][next[0].length];
+        
+        // Calculate optimal tile size to fit brick in fixed box
+        int brickRows = next.length;
+        int brickCols = next[0].length;
+        nextPreviewTileSize = calculateNextPreviewTileSize(brickRows, brickCols);
+        
+        // Calculate centering offsets
+        int gridCols = 4;
+        int gridRows = 4;
+        int offsetCol = (gridCols - brickCols) / 2;
+        int offsetRow = (gridRows - brickRows) / 2;
 
         for (int r = 0; r < next.length; r++) {
             for (int c = 0; c < next[r].length; c++) {
-                Rectangle rect = new Rectangle(currentTileSize, currentTileSize);
+                Rectangle rect = new Rectangle(nextPreviewTileSize, nextPreviewTileSize);
                 rect.setFill(Color.TRANSPARENT);
                 nextBrickTiles[r][c] = rect;
-                brickPanel.add(rect, c, r);
+                // Add at centered position
+                brickPanel.add(rect, offsetCol + c, offsetRow + r);
             }
         }
+        
+        // Both preview frames use fixed identical size from CSS (90x90)
+        // No dynamic sizing needed - boxes remain identical
+        
+        // Create second next brick tiles (NEXT 2)
+        if (brickPanel2 != null) {
+            int[][] next2 = viewData.getNextBrick2Data();
+            nextBrick2Tiles = new Rectangle[next2.length][next2[0].length];
+            
+            int brick2Rows = next2.length;
+            int brick2Cols = next2[0].length;
+            nextPreview2TileSize = calculateNextPreviewTileSize(brick2Rows, brick2Cols);
+            
+            int offsetCol2 = (gridCols - brick2Cols) / 2;
+            int offsetRow2 = (gridRows - brick2Rows) / 2;
+            
+            for (int r = 0; r < next2.length; r++) {
+                for (int c = 0; c < next2[r].length; c++) {
+                    Rectangle rect = new Rectangle(nextPreview2TileSize, nextPreview2TileSize);
+                    rect.setFill(Color.TRANSPARENT);
+                    nextBrick2Tiles[r][c] = rect;
+                    brickPanel2.add(rect, offsetCol2 + c, offsetRow2 + r);
+                }
+            }
+            
+            // Both preview frames use fixed identical size from CSS (90x90)
+            // No dynamic sizing needed - boxes remain identical
+        }
+        
+        // No animations - boxes remain static
 
         refreshView(viewData);
         
@@ -400,6 +453,7 @@ public class GuiController implements Initializable {
         drawGhostBrick(viewData);  // Draw ghost first (behind active)
         drawActiveBrick(viewData);
         drawNextBrick(viewData);
+        drawNextBrick2(viewData);
     }
 
     private void drawBoard(ViewData viewData) {
@@ -463,9 +517,146 @@ public class GuiController implements Initializable {
 
     private void drawNextBrick(ViewData data) {
         int[][] next = data.getNextBrickData();
+        int brickRows = next.length;
+        int brickCols = next[0].length;
+        
+        // Recalculate tile size if brick dimensions changed
+        int newTileSize = calculateNextPreviewTileSize(brickRows, brickCols);
+        boolean sizeChanged = newTileSize != nextPreviewTileSize;
+        
+        if (sizeChanged) {
+            nextPreviewTileSize = newTileSize;
+            // Resize all tiles
+            for (int r = 0; r < nextBrickTiles.length; r++) {
+                for (int c = 0; c < nextBrickTiles[r].length; c++) {
+                    if (nextBrickTiles[r][c] != null) {
+                        nextBrickTiles[r][c].setWidth(nextPreviewTileSize);
+                        nextBrickTiles[r][c].setHeight(nextPreviewTileSize);
+                    }
+                }
+            }
+            centerNextBrickInGrid(brickRows, brickCols);
+            // Box size is fixed in CSS - both boxes remain identical
+        }
+        
+        // Update colors - no animations (static bricks)
         for (int r = 0; r < next.length; r++) {
             for (int c = 0; c < next[r].length; c++) {
-                nextBrickTiles[r][c].setFill(getFill(next[r][c]));
+                if (nextBrickTiles[r][c] != null) {
+                    Paint fill = getFill(next[r][c]);
+                    nextBrickTiles[r][c].setFill(fill);
+                    // No fade-in animation - bricks remain static
+                }
+            }
+        }
+    }
+    
+    private void drawNextBrick2(ViewData data) {
+        if (brickPanel2 == null || nextBrick2Tiles == null) return;
+        
+        int[][] next2 = data.getNextBrick2Data();
+        int brick2Rows = next2.length;
+        int brick2Cols = next2[0].length;
+        
+        // Recalculate tile size if brick dimensions changed
+        int newTileSize = calculateNextPreviewTileSize(brick2Rows, brick2Cols);
+        boolean sizeChanged = newTileSize != nextPreview2TileSize;
+        
+        if (sizeChanged) {
+            nextPreview2TileSize = newTileSize;
+            // Resize tiles if needed
+            for (int r = 0; r < nextBrick2Tiles.length; r++) {
+                for (int c = 0; c < nextBrick2Tiles[r].length; c++) {
+                    if (nextBrick2Tiles[r][c] != null) {
+                        nextBrick2Tiles[r][c].setWidth(newTileSize);
+                        nextBrick2Tiles[r][c].setHeight(newTileSize);
+                    }
+                }
+            }
+            
+            // Use same centering method as NEXT 1 for identical alignment
+            centerNextBrick2InGrid(brick2Rows, brick2Cols);
+            // Box size is fixed in CSS - both boxes remain identical
+        }
+        
+        // Update colors - no animations (static bricks)
+        for (int r = 0; r < next2.length; r++) {
+            for (int c = 0; c < next2[r].length; c++) {
+                if (nextBrick2Tiles[r][c] != null) {
+                    Paint fill = getFill(next2[r][c]);
+                    nextBrick2Tiles[r][c].setFill(fill);
+                    // No fade-in animation - bricks remain static
+                }
+            }
+        }
+    }
+    
+    /**
+     * Returns fixed tile size for next preview (20px squares).
+     * No scaling - maintains original brick size.
+     * Both NEXT 1 and NEXT 2 use identical fixed size.
+     */
+    private int calculateNextPreviewTileSize(int brickRows, int brickCols) {
+        // Fixed 20px squares - no scaling based on window size
+        return NEXT_BRICK_TILE_SIZE;
+    }
+    
+    /**
+     * Sets up preview animations - DISABLED (no animations, static boxes).
+     * Both boxes remain static with no pulsing or flashing.
+     */
+    private void setupPreviewAnimations() {
+        // No animations - boxes remain static
+        // Both boxes use CSS styling only (no dynamic animations)
+    }
+    
+    /**
+     * Centers the next brick preview in the GridPane (NEXT 1).
+     * Uses identical logic to ensure perfect centering.
+     */
+    private void centerNextBrickInGrid(int brickRows, int brickCols) {
+        if (brickPanel == null || nextBrickTiles == null) return;
+        
+        // Calculate offset to center the brick
+        // GridPane is typically 4x4 for brick previews
+        int gridCols = 4;
+        int gridRows = 4;
+        
+        int offsetCol = (gridCols - brickCols) / 2;
+        int offsetRow = (gridRows - brickRows) / 2;
+        
+        // Reposition tiles
+        for (int r = 0; r < brickRows; r++) {
+            for (int c = 0; c < brickCols; c++) {
+                if (r < nextBrickTiles.length && c < nextBrickTiles[r].length && nextBrickTiles[r][c] != null) {
+                    GridPane.setColumnIndex(nextBrickTiles[r][c], offsetCol + c);
+                    GridPane.setRowIndex(nextBrickTiles[r][c], offsetRow + r);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Centers the next brick 2 preview in the GridPane (NEXT 2).
+     * Uses identical logic to NEXT 1 for pixel-perfect matching.
+     */
+    private void centerNextBrick2InGrid(int brickRows, int brickCols) {
+        if (brickPanel2 == null || nextBrick2Tiles == null) return;
+        
+        // Calculate offset to center the brick (identical logic to NEXT 1)
+        int gridCols = 4;
+        int gridRows = 4;
+        
+        int offsetCol = (gridCols - brickCols) / 2;
+        int offsetRow = (gridRows - brickRows) / 2;
+        
+        // Reposition tiles
+        for (int r = 0; r < brickRows; r++) {
+            for (int c = 0; c < brickCols; c++) {
+                if (r < nextBrick2Tiles.length && c < nextBrick2Tiles[r].length && nextBrick2Tiles[r][c] != null) {
+                    GridPane.setColumnIndex(nextBrick2Tiles[r][c], offsetCol + c);
+                    GridPane.setRowIndex(nextBrick2Tiles[r][c], offsetRow + r);
+                }
             }
         }
     }
