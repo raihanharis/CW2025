@@ -16,57 +16,68 @@
     <!-- Main game layout -->
     <HBox fx:id="gameContainer" alignment="CENTER" spacing="20" style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000);">
         
-        <!-- LEFT SIDEBAR - Control Panel (Official Tetris Style) -->
+        <!-- LEFT SIDEBAR - Two Independent Boxes -->
         <VBox fx:id="leftPanel" 
               alignment="TOP_CENTER" 
-              spacing="24"
-              style="-fx-background-color: linear-gradient(to bottom, #1a1a2e, #0d0d1a); -fx-padding: 5 15 15 15; -fx-background-radius: 10; -fx-min-width: 130; -fx-pref-width: 130; -fx-max-width: 130;">
+              spacing="16"
+              style="-fx-background-color: transparent; -fx-padding: 0; -fx-min-width: 130; -fx-pref-width: 130; -fx-max-width: 130;">
             
-            <!-- TETRIS Logo (Top) -->
-            <Label text="TETRIS" style="-fx-text-fill: #00d4ff; -fx-font-size: 24; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, #00d4ff, 10, 0.5, 0, 0);"/>
-            
-            <!-- SCORE Section -->
-            <VBox alignment="CENTER" spacing="6" styleClass="stat-panel score-panel">
-                <Label text="SCORE" styleClass="stat-title"/>
-                <Label fx:id="scoreLabel" text="0" styleClass="scoreValue"/>
-            </VBox>
-            
-            <!-- LEVEL Section -->
-            <VBox alignment="CENTER" spacing="6" styleClass="stat-panel level-panel">
-                <Label text="LEVEL" styleClass="stat-title"/>
-                <Label fx:id="levelLabel" text="1" styleClass="levelValue"/>
-            </VBox>
-            
-            <!-- LINES Section -->
-            <VBox alignment="CENTER" spacing="6" styleClass="stat-panel lines-panel">
-                <Label text="LINES" styleClass="stat-title"/>
-                <Label fx:id="linesLabel" text="0" styleClass="linesValue"/>
-            </VBox>
-            
-            <!-- HIGH SCORE Section -->
-            <VBox alignment="CENTER" spacing="6" styleClass="stat-panel score-panel">
-                <Label text="HIGH SCORE" styleClass="stat-title"/>
-                <Label fx:id="highScoreValue" text="0" styleClass="scoreValue"/>
-            </VBox>
-            
-            <!-- Restart Button (Unboxed) -->
-            <Button fx:id="restartButton" 
-                    text="⟳ RESTART"
-                    onAction="#onRestartClick"
-                    prefWidth="120"
-                    styleClass="game-button restart-button"/>
-            
-            <!-- Pause Button (Unboxed) -->
-            <Button fx:id="pauseButton"
-                    text="⏸ PAUSE"
-                    onAction="#onPauseClick"
-                    prefWidth="120"
-                    styleClass="game-button pause-resume-button"/>
-            
-            <!-- Controls Box (ONLY for text controls) -->
+            <!-- BOX 1: MAIN INFO PANEL -->
             <VBox alignment="CENTER" 
-                  spacing="6"
-                  styleClass="controls-text-box">
+                  spacing="18"
+                  styleClass="main-info-box">
+                
+                <!-- TETRIS Logo (Top) -->
+                <Label text="TETRIS" style="-fx-text-fill: #00d4ff; -fx-font-size: 24; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, #00d4ff, 10, 0.5, 0, 0);"/>
+                
+                <!-- SCORE Section -->
+                <VBox alignment="CENTER" spacing="6" styleClass="stat-panel score-panel">
+                    <Label text="SCORE" styleClass="stat-title"/>
+                    <Label fx:id="scoreLabel" text="0" styleClass="scoreValue"/>
+                </VBox>
+                
+                <!-- LEVEL Section -->
+                <VBox alignment="CENTER" spacing="6" styleClass="stat-panel level-panel">
+                    <Label text="LEVEL" styleClass="stat-title"/>
+                    <Label fx:id="levelLabel" text="1" styleClass="levelValue"/>
+                </VBox>
+                
+                <!-- LINES Section -->
+                <VBox alignment="CENTER" spacing="6" styleClass="stat-panel lines-panel">
+                    <Label text="LINES" styleClass="stat-title"/>
+                    <Label fx:id="linesLabel" text="0" styleClass="linesValue"/>
+                </VBox>
+                
+                <!-- HIGH SCORE Section -->
+                <VBox alignment="CENTER" spacing="6" styleClass="stat-panel score-panel">
+                    <Label text="HIGH SCORE" styleClass="stat-title"/>
+                    <Label fx:id="highScoreValue" text="0" styleClass="scoreValue"/>
+                </VBox>
+                
+                <!-- Restart Button -->
+                <Button fx:id="restartButton" 
+                        text="⟳ RESTART"
+                        onAction="#onRestartClick"
+                        prefWidth="110"
+                        styleClass="game-button restart-button"/>
+                
+                <!-- Pause Button -->
+                <Button fx:id="pauseButton"
+                        text="⏸ PAUSE"
+                        onAction="#onPauseClick"
+                        prefWidth="110"
+                        styleClass="game-button pause-resume-button"/>
+            </VBox>
+            
+            <!-- BOX 2: CONTROLS PANEL -->
+            <VBox alignment="CENTER" 
+                  spacing="8"
+                  styleClass="controls-panel-box">
+                
+                <!-- CONTROLS Title -->
+                <Label text="CONTROLS" styleClass="controls-title"/>
+                
+                <!-- Control Instructions -->
                 <Label text="← →  Move" styleClass="control-text"/>
                 <Label text="↑    Rotate" styleClass="control-text"/>
                 <Label text="↓    Soft Drop" styleClass="control-text"/>

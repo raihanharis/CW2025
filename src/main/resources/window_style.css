@@ -206,29 +206,64 @@
 }
 
 /* ============================================
-   CONTROLS TEXT BOX (Styled Container for Controls Text Only)
+   BOX 1: MAIN INFO PANEL
    ============================================ */
-.controls-text-box {
-    -fx-background-color: #0d0f1b;        /* dark background matching official Tetris UI */
-    -fx-padding: 12;                       /* 10-14px inner padding */
-    -fx-background-radius: 8;             /* 6-10px rounded corners */
-    -fx-border-color: #65e7ff;            /* thin neon cyan border - matches next-box */
-    -fx-border-width: 2.5;                 /* thin border */
-    -fx-border-radius: 8;                 /* rounded corners matching background */
-    -fx-effect: dropshadow(gaussian, rgba(101, 231, 255, 0.5), 10, 0.7, 0, 0),
-                dropshadow(gaussian, rgba(0, 0, 0, 0.6), 8, 0, 0, 2);  /* slight shadow for depth */
+.main-info-box {
+    -fx-background-color: #0d1020;        /* slightly rounded rectangle background */
+    -fx-padding: 25;                       /* 20-30px internal padding */
+    -fx-background-radius: 10;             /* slightly rounded corners */
+    -fx-border-color: #65e7ff;            /* subtle neon border glow (cyan/blue) */
+    -fx-border-width: 2.5;                 /* border thickness */
+    -fx-border-radius: 10;                 /* rounded corners matching background */
+    -fx-effect: dropshadow(gaussian, rgba(101, 231, 255, 0.6), 12, 0.8, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.7), 10, 0, 0, 3);  /* subtle neon glow + depth */
     -fx-alignment: center;
+    -fx-min-width: 130;
+    -fx-pref-width: 130;
+    -fx-max-width: 130;
 }
 
 /* ============================================
-   CONTROL TEXT (Inside Controls Box)
+   BOX 2: CONTROLS PANEL
+   ============================================ */
+.controls-panel-box {
+    -fx-background-color: #0a0d18;        /* slightly darker than Box 1 */
+    -fx-padding: 15;                       /* 12-18px internal padding */
+    -fx-background-radius: 8;             /* rounded corners */
+    -fx-border-color: rgba(101, 231, 255, 0.4);  /* thin cyan outline, softer than Box 1 */
+    -fx-border-width: 2;                   /* thin border */
+    -fx-border-radius: 8;                 /* rounded corners matching background */
+    -fx-effect: dropshadow(gaussian, rgba(101, 231, 255, 0.3), 8, 0.6, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.5), 6, 0, 0, 2);  /* softer shadow */
+    -fx-alignment: center;
+    -fx-min-width: 130;
+    -fx-pref-width: 130;
+    -fx-max-width: 130;
+}
+
+/* ============================================
+   CONTROLS TITLE (Inside Controls Panel)
+   ============================================ */
+.controls-title {
+    -fx-text-fill: #65e7ff;               /* neon cyan color */
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-font-family: 'Arial', sans-serif;
+    -fx-letter-spacing: 1px;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-padding: 0 0 4 0;                 /* small spacing below title */
+}
+
+/* ============================================
+   CONTROL TEXT (Inside Controls Panel)
    ============================================ */
 .control-text {
     -fx-text-fill: #66e0ff;               /* brighter text for readability */
-    -fx-font-size: 11px;
+    -fx-font-size: 10px;                   /* smaller text */
     -fx-font-weight: normal;
     -fx-font-family: 'Arial', sans-serif;
-    -fx-letter-spacing: 1.5px;            /* 1-2px letter spacing */
+    -fx-letter-spacing: 1px;               /* evenly spaced */
     -fx-alignment: center;
     -fx-text-alignment: center;
 }
