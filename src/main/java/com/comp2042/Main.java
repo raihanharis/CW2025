@@ -24,7 +24,7 @@ public class Main extends Application {
         new GameController(gui);
 
         primaryStage.setTitle("My Tetris Game");
-        primaryStage.setScene(new Scene(root, 300, 510));
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 

@@ -7,7 +7,8 @@ public class GameController implements InputEventListener {
 
     public GameController(GuiController gui) {
         this.gui = gui;
-        this.board = new SimpleBoard(25, 10);
+        // Official Tetris: 10 columns × 22 rows (20 visible + 2 hidden spawn rows)
+        this.board = new SimpleBoard(10, 22);
 
         board.createNewBrick();
 

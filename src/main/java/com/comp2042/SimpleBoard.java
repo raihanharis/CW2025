@@ -110,7 +110,10 @@ public class SimpleBoard implements Board {
         Brick currentBrick = brickGenerator.getBrick();
         brickRotator.setBrick(currentBrick);
 
-        currentOffset = new Point(4, 0);
+        // Official Tetris: spawn centered at top
+        // For 10-column board with 4-wide brick matrix, column 3 centers the piece
+        // Spawn at row 0 (top of the hidden spawn area)
+        currentOffset = new Point(3, 0);
 
         return MatrixOperations.intersect(
                 currentGameMatrix,

@@ -47,9 +47,12 @@ public final class MatrixOperations {
 
     /**
      * Returns true if the given coordinates lie outside the board.
+     * Note: Negative y (above the board) is allowed for spawning bricks.
      */
     private static boolean isOutOfBounds(int[][] matrix, int x, int y) {
-        return x < 0 || y < 0 || y >= matrix.length || x >= matrix[y].length;
+        // Allow negative y (brick spawning above board)
+        if (y < 0) return false;
+        return x < 0 || y >= matrix.length || x >= matrix[y].length;
     }
 
     /**
@@ -87,6 +90,9 @@ public final class MatrixOperations {
 
                 int targetX = x + col;
                 int targetY = y + row;
+
+                // Skip cells above the board
+                if (targetY < 0) continue;
 
                 merged[targetY][targetX] = brick[row][col];
             }

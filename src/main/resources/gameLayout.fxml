@@ -5,52 +5,42 @@
 <?import com.comp2042.GameOverPanel?>
 <?import java.net.URL?>
 <?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
 
-<Pane fx:controller="com.comp2042.GuiController"
-      xmlns:fx="http://javafx.com/fxml">
+<StackPane fx:controller="com.comp2042.GuiController"
+           xmlns:fx="http://javafx.com/fxml"
+           style="-fx-background-color: #1a1a2e;">
 
-    <!-- MAIN GAME AREA -->
-    <BorderPane fx:id="gameBoard"
-                prefWidth="480"
-                prefHeight="640"
-                styleClass="gameBoard">
-
-        <!-- CENTER: Falling brick + background -->
-        <center>
+    <!-- Main game content -->
+    <HBox spacing="20" alignment="CENTER">
+        <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+        
+        <!-- LEFT: Game Board with border -->
+        <VBox alignment="CENTER" style="-fx-background-color: #16213e; -fx-padding: 8; -fx-background-radius: 5;">
             <GridPane fx:id="gamePanel"
-                      layoutX="40"
-                      layoutY="30"
                       hgap="1"
-                      vgap="1"/>
-        </center>
+                      vgap="1"
+                      style="-fx-background-color: #0f0f23; -fx-padding: 2;"/>
+        </VBox>
 
-        <!-- TOP-RIGHT: Next Brick Preview -->
-        <top>
-            <HBox alignment="TOP_RIGHT">
-                <VBox alignment="TOP_RIGHT" spacing="6">
-                    <Label text="Next:" style="-fx-text-fill: white; -fx-font-size: 16;" />
-                    <GridPane fx:id="brickPanel" hgap="1" vgap="1"/>
-                </VBox>
-            </HBox>
-        </top>
+        <!-- RIGHT: Next brick preview -->
+        <VBox spacing="10" alignment="TOP_CENTER">
+            <VBox spacing="5" alignment="CENTER" style="-fx-background-color: #16213e; -fx-padding: 10; -fx-background-radius: 5;">
+                <Label text="NEXT" style="-fx-text-fill: #e0e0e0; -fx-font-size: 12; -fx-font-weight: bold;"/>
+                <GridPane fx:id="brickPanel" hgap="1" vgap="1" alignment="CENTER"/>
+            </VBox>
+            
+            <!-- Score notification area -->
+            <Group fx:id="groupNotification"/>
+        </VBox>
+    </HBox>
 
-    </BorderPane>
+    <!-- GAME OVER PANEL - centered overlay -->
+    <GameOverPanel fx:id="gameOverPanel" visible="false" 
+                   style="-fx-background-color: rgba(0,0,0,0.7); -fx-padding: 20;"/>
 
-    <!-- SCORE POPUP GROUP -->
-    <Group fx:id="groupNotification"
-           layoutX="20"
-           layoutY="200">
-    </Group>
-
-    <!-- GAME OVER PANEL -->
-    <GameOverPanel fx:id="gameOverPanel"
-                   layoutX="160"
-                   layoutY="250"
-                   visible="false"/>
-
-    <!-- CSS -->
     <stylesheets>
         <URL value="@window_style.css"/>
     </stylesheets>
 
-</Pane>
+</StackPane>

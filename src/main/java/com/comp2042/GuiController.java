@@ -24,6 +24,7 @@ import java.util.ResourceBundle;
 public class GuiController implements Initializable {
 
     private static final int BRICK_SIZE = 20;
+    private static final int HIDDEN_ROWS = 2;  // Hidden spawn rows at top (official Tetris)
 
     @FXML
     private GridPane gamePanel;
@@ -73,14 +74,21 @@ public class GuiController implements Initializable {
     }
 
     public void initGameView(int[][] boardMatrix, ViewData viewData) {
-        boardTiles = new Rectangle[boardMatrix.length][boardMatrix[0].length];
+        // Only create tiles for visible rows (skip hidden spawn rows)
+        int visibleRows = boardMatrix.length - HIDDEN_ROWS;
+        int cols = boardMatrix[0].length;
+        
+        boardTiles = new Rectangle[boardMatrix.length][cols];
 
         for (int r = 0; r < boardMatrix.length; r++) {
-            for (int c = 0; c < boardMatrix[r].length; c++) {
+            for (int c = 0; c < cols; c++) {
                 Rectangle rect = new Rectangle(BRICK_SIZE, BRICK_SIZE);
                 rect.setFill(Color.TRANSPARENT);
                 boardTiles[r][c] = rect;
-                gamePanel.add(rect, c, r);
+                // Only add visible rows to the grid
+                if (r >= HIDDEN_ROWS) {
+                    gamePanel.add(rect, c, r - HIDDEN_ROWS);
+                }
             }
         }
 
@@ -127,7 +135,8 @@ public class GuiController implements Initializable {
     private void drawBoard(ViewData viewData) {
         int[][] board = viewData.getBoardMatrix();
 
-        for (int r = 0; r < board.length && r < boardTiles.length; r++) {
+        // Only draw visible rows (skip hidden spawn rows)
+        for (int r = HIDDEN_ROWS; r < board.length && r < boardTiles.length; r++) {
             for (int c = 0; c < board[r].length && c < boardTiles[r].length; c++) {
                 boardTiles[r][c].setFill(getFill(board[r][c]));
             }
@@ -142,14 +151,17 @@ public class GuiController implements Initializable {
         for (int r = 0; r < mat.length; r++) {
             for (int c = 0; c < mat[r].length; c++) {
                 Rectangle tile = activeBrickTiles[r][c];
+                int targetRow = y + r;
+                // Offset for hidden rows - only show if in visible area
+                int visibleRow = targetRow - HIDDEN_ROWS;
 
-                if (mat[r][c] == 0) {
+                if (mat[r][c] == 0 || visibleRow < 0) {
                     tile.setFill(Color.TRANSPARENT);
                     continue;
                 }
 
                 tile.setFill(getFill(mat[r][c]));
-                gamePanel.setRowIndex(tile, y + r);
+                gamePanel.setRowIndex(tile, visibleRow);
                 gamePanel.setColumnIndex(tile, x + c);
             }
         }

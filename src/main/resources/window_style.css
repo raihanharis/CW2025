@@ -60,8 +60,11 @@
 
 .gameOverStyle {
     -fx-font-family: "Let's go Digital";
-    -fx-font-size: 48;
-    -fx-background-color: red;
+    -fx-font-size: 36;
+    -fx-text-fill: white;
+    -fx-background-color: #cc0000;
+    -fx-padding: 15 25 15 25;
+    -fx-background-radius: 8;
 }
 
 .scoreClass{
