@@ -51,6 +51,7 @@ public class GuiController implements Initializable {
 
     private Rectangle[][] boardTiles;
     private Rectangle[][] activeBrickTiles;
+    private Rectangle[][] ghostBrickTiles;  // Ghost piece tiles
     private Rectangle[][] nextBrickTiles;
 
     private InputEventListener eventListener;
@@ -121,6 +122,18 @@ public class GuiController implements Initializable {
             }
         }
         
+        // Resize ghost brick tiles
+        if (ghostBrickTiles != null) {
+            for (int r = 0; r < ghostBrickTiles.length; r++) {
+                for (int c = 0; c < ghostBrickTiles[r].length; c++) {
+                    if (ghostBrickTiles[r][c] != null) {
+                        ghostBrickTiles[r][c].setWidth(currentTileSize);
+                        ghostBrickTiles[r][c].setHeight(currentTileSize);
+                    }
+                }
+            }
+        }
+        
         // Resize next brick tiles
         if (nextBrickTiles != null) {
             for (int r = 0; r < nextBrickTiles.length; r++) {
@@ -175,8 +188,20 @@ public class GuiController implements Initializable {
             }
         }
 
-        // Create active brick tiles
+        // Create ghost brick tiles (added first so they render behind active brick)
         int[][] shape = viewData.getBrickData();
+        ghostBrickTiles = new Rectangle[shape.length][shape[0].length];
+
+        for (int r = 0; r < shape.length; r++) {
+            for (int c = 0; c < shape[r].length; c++) {
+                Rectangle rect = new Rectangle(currentTileSize, currentTileSize);
+                rect.setFill(Color.TRANSPARENT);
+                ghostBrickTiles[r][c] = rect;
+                gamePanel.add(rect, c, r);
+            }
+        }
+
+        // Create active brick tiles (added after ghost so they render on top)
         activeBrickTiles = new Rectangle[shape.length][shape[0].length];
 
         for (int r = 0; r < shape.length; r++) {
@@ -218,6 +243,7 @@ public class GuiController implements Initializable {
     public void refreshView(ViewData viewData) {
         lastViewData = viewData;
         drawBoard(viewData);
+        drawGhostBrick(viewData);  // Draw ghost first (behind active)
         drawActiveBrick(viewData);
         drawNextBrick(viewData);
     }
@@ -229,6 +255,31 @@ public class GuiController implements Initializable {
             for (int c = 0; c < board[r].length && c < boardTiles[r].length; c++) {
                 Paint fill = board[r][c] == 0 ? Color.web("#111111") : getFill(board[r][c]);
                 boardTiles[r][c].setFill(fill);
+            }
+        }
+    }
+
+    private void drawGhostBrick(ViewData data) {
+        int[][] mat = data.getBrickData();
+        int x = data.getxPosition();
+        int ghostY = data.getGhostYPosition();
+        int activeY = data.getyPosition();
+
+        for (int r = 0; r < mat.length; r++) {
+            for (int c = 0; c < mat[r].length; c++) {
+                Rectangle tile = ghostBrickTiles[r][c];
+                int targetRow = ghostY + r;
+                int visibleRow = targetRow - HIDDEN_ROWS;
+
+                // Don't show ghost if it overlaps with active brick or is above visible area
+                if (mat[r][c] == 0 || visibleRow < 0 || ghostY == activeY) {
+                    tile.setFill(Color.TRANSPARENT);
+                    continue;
+                }
+
+                tile.setFill(getGhostFill(mat[r][c]));
+                GridPane.setRowIndex(tile, visibleRow);
+                GridPane.setColumnIndex(tile, x + c);
             }
         }
     }
@@ -274,6 +325,22 @@ public class GuiController implements Initializable {
             case 5 -> Color.RED;
             case 6 -> Color.ORANGE;
             case 7 -> Color.DEEPSKYBLUE;
+            default -> Color.TRANSPARENT;
+        };
+    }
+    
+    /**
+     * Returns a semi-transparent version of the brick color for the ghost piece.
+     */
+    private Paint getGhostFill(int v) {
+        return switch (v) {
+            case 1 -> Color.CYAN.deriveColor(0, 1, 1, 0.25);
+            case 2 -> Color.BLUEVIOLET.deriveColor(0, 1, 1, 0.25);
+            case 3 -> Color.LIMEGREEN.deriveColor(0, 1, 1, 0.25);
+            case 4 -> Color.YELLOW.deriveColor(0, 1, 1, 0.25);
+            case 5 -> Color.RED.deriveColor(0, 1, 1, 0.25);
+            case 6 -> Color.ORANGE.deriveColor(0, 1, 1, 0.25);
+            case 7 -> Color.DEEPSKYBLUE.deriveColor(0, 1, 1, 0.25);
             default -> Color.TRANSPARENT;
         };
     }

@@ -7,13 +7,17 @@ public final class ViewData {
     private final int yPosition;
     private final int[][] nextBrickData;
     private final int[][] boardMatrix;
+    
+    // Ghost piece data
+    private final int ghostYPosition;
 
-    public ViewData(int[][] brickData, int xPosition, int yPosition, int[][] nextBrickData, int[][] boardMatrix) {
+    public ViewData(int[][] brickData, int xPosition, int yPosition, int[][] nextBrickData, int[][] boardMatrix, int ghostYPosition) {
         this.brickData = brickData;
         this.xPosition = xPosition;
         this.yPosition = yPosition;
         this.nextBrickData = nextBrickData;
         this.boardMatrix = boardMatrix;
+        this.ghostYPosition = ghostYPosition;
     }
 
     public int[][] getBrickData() {
@@ -34,5 +38,13 @@ public final class ViewData {
 
     public int[][] getBoardMatrix() {
         return MatrixOperations.copy(boardMatrix);
+    }
+    
+    /**
+     * Returns the Y position where the ghost piece should be rendered.
+     * The ghost piece shows where the brick will land on hard drop.
+     */
+    public int getGhostYPosition() {
+        return ghostYPosition;
     }
 }
