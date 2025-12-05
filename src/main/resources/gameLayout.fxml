@@ -19,14 +19,11 @@
         <!-- LEFT SIDEBAR - Control Panel (Official Tetris Style) -->
         <VBox fx:id="leftPanel" 
               alignment="TOP_CENTER" 
-              spacing="14"
-              style="-fx-background-color: linear-gradient(to bottom, #1a1a2e, #0d0d1a); -fx-padding: 20 15; -fx-background-radius: 10; -fx-min-width: 130; -fx-pref-width: 130; -fx-max-width: 130;">
+              spacing="24"
+              style="-fx-background-color: linear-gradient(to bottom, #1a1a2e, #0d0d1a); -fx-padding: 5 15 15 15; -fx-background-radius: 10; -fx-min-width: 130; -fx-pref-width: 130; -fx-max-width: 130;">
             
-            <!-- Title -->
+            <!-- TETRIS Logo (Top) -->
             <Label text="TETRIS" style="-fx-text-fill: #00d4ff; -fx-font-size: 24; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, #00d4ff, 10, 0.5, 0, 0);"/>
-            
-            <!-- Separator -->
-            <Separator style="-fx-padding: 5 0;"/>
             
             <!-- SCORE Section -->
             <VBox alignment="CENTER" spacing="6" styleClass="stat-panel score-panel">
@@ -46,32 +43,29 @@
                 <Label fx:id="linesLabel" text="0" styleClass="linesValue"/>
             </VBox>
             
-            <!-- Spacer -->
-            <Region VBox.vgrow="ALWAYS"/>
+            <!-- Restart Button (Unboxed) -->
+            <Button fx:id="restartButton" 
+                    text="⟳ RESTART"
+                    onAction="#onRestartClick"
+                    prefWidth="120"
+                    styleClass="game-button restart-button"/>
             
-            <!-- Buttons Section -->
-            <VBox alignment="CENTER" spacing="20">
-                <Button fx:id="restartButton" 
-                        text="⟳ RESTART"
-                        onAction="#onRestartClick"
-                        prefWidth="120"
-                        styleClass="game-button restart-button"/>
-                
-                <Button fx:id="pauseButton"
-                        text="⏸ PAUSE"
-                        onAction="#onPauseClick"
-                        prefWidth="120"
-                        styleClass="game-button pause-resume-button"/>
-            </VBox>
+            <!-- Pause Button (Unboxed) -->
+            <Button fx:id="pauseButton"
+                    text="⏸ PAUSE"
+                    onAction="#onPauseClick"
+                    prefWidth="120"
+                    styleClass="game-button pause-resume-button"/>
             
-            <!-- Controls Help -->
-            <VBox alignment="CENTER" spacing="3" style="-fx-padding: 15 0 0 0;">
-                <Label text="─── CONTROLS ───" style="-fx-text-fill: #555555; -fx-font-size: 9;"/>
-                <Label text="← →  Move" style="-fx-text-fill: #666666; -fx-font-size: 10;"/>
-                <Label text="↑    Rotate" style="-fx-text-fill: #666666; -fx-font-size: 10;"/>
-                <Label text="↓    Soft Drop" style="-fx-text-fill: #666666; -fx-font-size: 10;"/>
-                <Label text="SPACE Hard Drop" style="-fx-text-fill: #666666; -fx-font-size: 10;"/>
-                <Label text="P    Pause" style="-fx-text-fill: #666666; -fx-font-size: 10;"/>
+            <!-- Controls Box (ONLY for text controls) -->
+            <VBox alignment="CENTER" 
+                  spacing="6"
+                  styleClass="controls-text-box">
+                <Label text="← →  Move" styleClass="control-text"/>
+                <Label text="↑    Rotate" styleClass="control-text"/>
+                <Label text="↓    Soft Drop" styleClass="control-text"/>
+                <Label text="SPACE Hard Drop" styleClass="control-text"/>
+                <Label text="P    Pause" styleClass="control-text"/>
             </VBox>
         </VBox>
         

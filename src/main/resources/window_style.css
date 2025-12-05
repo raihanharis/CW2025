@@ -206,6 +206,34 @@
 }
 
 /* ============================================
+   CONTROLS TEXT BOX (Styled Container for Controls Text Only)
+   ============================================ */
+.controls-text-box {
+    -fx-background-color: #0d0f1b;        /* dark background matching official Tetris UI */
+    -fx-padding: 12;                       /* 10-14px inner padding */
+    -fx-background-radius: 8;             /* 6-10px rounded corners */
+    -fx-border-color: #65e7ff;            /* thin neon cyan border - matches next-box */
+    -fx-border-width: 2.5;                 /* thin border */
+    -fx-border-radius: 8;                 /* rounded corners matching background */
+    -fx-effect: dropshadow(gaussian, rgba(101, 231, 255, 0.5), 10, 0.7, 0, 0),
+                dropshadow(gaussian, rgba(0, 0, 0, 0.6), 8, 0, 0, 2);  /* slight shadow for depth */
+    -fx-alignment: center;
+}
+
+/* ============================================
+   CONTROL TEXT (Inside Controls Box)
+   ============================================ */
+.control-text {
+    -fx-text-fill: #66e0ff;               /* brighter text for readability */
+    -fx-font-size: 11px;
+    -fx-font-weight: normal;
+    -fx-font-family: 'Arial', sans-serif;
+    -fx-letter-spacing: 1.5px;            /* 1-2px letter spacing */
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
+
+/* ============================================
    STATISTICS PANELS (SCORE, LEVEL, LINES)
    ============================================ */
 
