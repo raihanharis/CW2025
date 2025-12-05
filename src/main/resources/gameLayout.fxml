@@ -13,8 +13,16 @@
            xmlns:fx="http://javafx.com/fxml"
            style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000);">
 
-    <!-- Main game layout -->
-    <HBox fx:id="gameContainer" alignment="CENTER" spacing="20" style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000);">
+    <!-- Centered Container - Wraps all three panels -->
+    <HBox alignment="CENTER" 
+          HBox.hgrow="ALWAYS"
+          style="-fx-background-color: transparent;">
+        
+        <!-- Main game layout - All three panels -->
+        <HBox fx:id="gameContainer" 
+              alignment="TOP_CENTER" 
+              spacing="40"
+              style="-fx-background-color: transparent;">
         
         <!-- LEFT SIDEBAR - Two Independent Boxes -->
         <VBox fx:id="leftPanel" 
@@ -23,7 +31,7 @@
               style="-fx-background-color: transparent; -fx-padding: 0; -fx-min-width: 130; -fx-pref-width: 130; -fx-max-width: 130;">
             
             <!-- BOX 1: MAIN INFO PANEL -->
-            <VBox alignment="CENTER" 
+            <VBox alignment="TOP_CENTER" 
                   spacing="18"
                   styleClass="main-info-box">
                 
@@ -87,7 +95,9 @@
         </VBox>
         
         <!-- CENTER: Game Board Container -->
-        <VBox alignment="CENTER" styleClass="playfield-container">
+        <VBox alignment="TOP_CENTER" 
+              styleClass="playfield-container"
+              HBox.hgrow="NEVER">
             <GridPane fx:id="gamePanel" 
                       hgap="1" 
                       vgap="1"
@@ -98,7 +108,7 @@
         <VBox fx:id="nextPanel" 
               alignment="TOP_CENTER" 
               spacing="12"
-              style="-fx-padding: 30 0; -fx-min-width: 100; -fx-pref-width: 100; -fx-max-width: 100;">
+              style="-fx-padding: 0; -fx-min-width: 100; -fx-pref-width: 100; -fx-max-width: 100;">
             
             <!-- NEXT 1 Label - Above the first frame (center-aligned) -->
             <Label fx:id="nextLabel" 
@@ -133,6 +143,7 @@
             <!-- Notification group stays outside the frames -->
             <Group fx:id="groupNotification"/>
         </VBox>
+        </HBox>
     </HBox>
 
     <!-- Pause Overlay -->

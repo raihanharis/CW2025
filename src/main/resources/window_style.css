@@ -18,8 +18,8 @@
    PLAYFIELD CONTAINER (Modern Tetris Style)
    ============================================ */
 .playfield-container {
-    -fx-alignment: center;
-    -fx-padding: 15;
+    -fx-alignment: top-center;
+    -fx-padding: 0;
 }
 
 .playfield-grid {
@@ -217,7 +217,7 @@
     -fx-border-radius: 10;                 /* rounded corners matching background */
     -fx-effect: dropshadow(gaussian, rgba(101, 231, 255, 0.6), 12, 0.8, 0, 0),
                 dropshadow(gaussian, rgba(0, 0, 0, 0.7), 10, 0, 0, 3);  /* subtle neon glow + depth */
-    -fx-alignment: center;
+    -fx-alignment: top-center;
     -fx-min-width: 130;
     -fx-pref-width: 130;
     -fx-max-width: 130;
