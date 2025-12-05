@@ -22,6 +22,19 @@ public class GameController implements InputEventListener {
         // Initialize high score display
         gui.updateHighScore(highScore);
     }
+    
+    /**
+     * Checks if the current score exceeds the high score and updates it in real-time.
+     * This method is called after every score change to ensure the high score
+     * updates immediately during gameplay, not just after game over.
+     */
+    private void checkAndUpdateHighScore() {
+        int currentScore = board.getScore().scoreProperty().get();
+        if (currentScore > highScore) {
+            highScore = currentScore;
+            gui.updateHighScore(highScore);
+        }
+    }
 
     @Override
     public DownData onDownEvent(MoveEvent event) {
@@ -35,20 +48,20 @@ public class GameController implements InputEventListener {
             if (rowClearResult.getRowsCleared() > 0) {
                 board.getScore().add(rowClearResult.getPointsEarned());
                 gui.updateLinesCleared(rowClearResult.getRowsCleared());
+                // Check and update high score in real-time after line clear
+                checkAndUpdateHighScore();
             }
 
             if (board.createNewBrick()) {
-                // Check and update high score when game ends
-                int currentScore = board.getScore().scoreProperty().get();
-                if (currentScore > highScore) {
-                    highScore = currentScore;
-                    gui.updateHighScore(highScore);
-                }
+                // Final check when game ends (safety net, but should already be updated)
+                checkAndUpdateHighScore();
                 gui.gameOver();
             }
         } else {
             if (event.getEventSource() == EventSource.USER) {
                 board.getScore().add(1);
+                // Check and update high score in real-time after soft drop
+                checkAndUpdateHighScore();
             }
         }
 
@@ -82,21 +95,22 @@ public class GameController implements InputEventListener {
         }
 
         board.getScore().add(dropDistance * 2);
+        // Check and update high score in real-time after hard drop points
+        checkAndUpdateHighScore();
+        
         board.mergeBrickToBackground();
 
         RowClearResult result = board.clearRows();
         if (result.getRowsCleared() > 0) {
             board.getScore().add(result.getPointsEarned());
             gui.updateLinesCleared(result.getRowsCleared());
+            // Check and update high score in real-time after line clear from hard drop
+            checkAndUpdateHighScore();
         }
 
         if (board.createNewBrick()) {
-            // Check and update high score when game ends
-            int currentScore = board.getScore().scoreProperty().get();
-            if (currentScore > highScore) {
-                highScore = currentScore;
-                gui.updateHighScore(highScore);
-            }
+            // Final check when game ends (safety net, but should already be updated)
+            checkAndUpdateHighScore();
             gui.gameOver();
         }
 
