@@ -23,9 +23,16 @@ public class Main extends Application {
         // Create the game controller and connect it to GUI
         new GameController(gui);
 
-        primaryStage.setTitle("My Tetris Game");
-        primaryStage.setScene(new Scene(root));
+        primaryStage.setTitle("Tetris");
+        Scene scene = new Scene(root, 450, 580);
+        scene.setFill(javafx.scene.paint.Color.BLACK);
+        primaryStage.setScene(scene);
+        primaryStage.setMinWidth(300);
+        primaryStage.setMinHeight(400);
         primaryStage.show();
+        
+        // Request focus for keyboard input
+        root.requestFocus();
     }
 
     public static void main(String[] args) {

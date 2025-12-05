@@ -1,17 +1,17 @@
 .root {
-    -fx-background-image: url("background_image.png");
+    -fx-background-color: #000000;
 }
 
 .nextBrick {
-    -fx-border-width: 2px;
-    -fx-border-color: whitesmoke;
-    -fx-border-radius: 17px;
+    -fx-background-color: transparent;
 }
 
 .gameBoard {
-    -fx-border-color: linear-gradient(#2A5058, #61a2b1);
-    -fx-border-width: 12px;
-    -fx-border-radius: 12px;
+    -fx-background-color: transparent;
+}
+
+.grid-pane {
+    -fx-background-color: transparent;
 }
 
 .nextBrickLabel {
