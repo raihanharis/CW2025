@@ -56,6 +56,7 @@ public class GuiController implements Initializable {
     @FXML private StackPane rootPane;
     @FXML private HBox gameContainer;
     @FXML private VBox leftPanel;
+    @FXML private StackPane gameBoardStackPane;
     @FXML private GridPane gamePanel;
     @FXML private VBox nextPanel;
     @FXML private Label nextLabel;
@@ -840,6 +841,12 @@ public class GuiController implements Initializable {
         isGameOver.set(true);
         timeline.stop();
         gameOverPanel.setVisible(true);
+        
+        // Hide and collapse the Pause button when game is over
+        if (pauseButton != null) {
+            pauseButton.setVisible(false);
+            pauseButton.setManaged(false);
+        }
     }
 
     public void newGame(ActionEvent event) {
@@ -854,6 +861,12 @@ public class GuiController implements Initializable {
         if (pauseOverlay != null) {
             pauseOverlay.setVisible(false);
             pauseOverlay.setOpacity(0.0);
+        }
+        
+        // Show and restore the Pause button when starting a new game
+        if (pauseButton != null) {
+            pauseButton.setVisible(true);
+            pauseButton.setManaged(true);
         }
         
         updatePauseButtonText();

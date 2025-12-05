@@ -100,9 +100,9 @@
 .game-button {
     -fx-background-radius: 15px;
     -fx-border-radius: 15px;
-    -fx-padding: 12 24 12 24;
+    -fx-padding: 6 16 6 16;           /* more horizontal padding for full text visibility */
     -fx-font-family: "Arial Black", "Arial", sans-serif;
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;              /* increased font size */
     -fx-font-weight: bold;
     -fx-text-fill: white;
     -fx-cursor: hand;
@@ -110,6 +110,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
     -fx-background-insets: 0;
     -fx-border-insets: 0;
+    -fx-min-width: 110px;             /* forces full word visibility */
 }
 
 /* Restart Button - Blue-Cyan Gradient */
@@ -210,17 +211,16 @@
    ============================================ */
 .main-info-box {
     -fx-background-color: #0d1020;        /* slightly rounded rectangle background */
-    -fx-padding: 25;                       /* 20-30px internal padding */
+    -fx-padding: 12;                       /* padding with border insets */
     -fx-background-radius: 10;             /* slightly rounded corners */
     -fx-border-color: #65e7ff;            /* subtle neon border glow (cyan/blue) */
     -fx-border-width: 2.5;                 /* border thickness */
     -fx-border-radius: 10;                 /* rounded corners matching background */
+    -fx-border-insets: 0;                  /* don't let borders shrink content */
     -fx-effect: dropshadow(gaussian, rgba(101, 231, 255, 0.6), 12, 0.8, 0, 0),
                 dropshadow(gaussian, rgba(0, 0, 0, 0.7), 10, 0, 0, 3);  /* subtle neon glow + depth */
     -fx-alignment: top-center;
-    -fx-min-width: 130;
-    -fx-pref-width: 130;
-    -fx-max-width: 130;
+    -fx-max-width: Infinity;               /* auto-resize to parent width */
 }
 
 /* ============================================
@@ -228,17 +228,16 @@
    ============================================ */
 .controls-panel-box {
     -fx-background-color: #0a0d18;        /* slightly darker than Box 1 */
-    -fx-padding: 15;                       /* 12-18px internal padding */
+    -fx-padding: 12;                       /* padding with border insets */
     -fx-background-radius: 8;             /* rounded corners */
     -fx-border-color: rgba(101, 231, 255, 0.4);  /* thin cyan outline, softer than Box 1 */
     -fx-border-width: 2;                   /* thin border */
     -fx-border-radius: 8;                 /* rounded corners matching background */
+    -fx-border-insets: 0;                  /* don't let borders shrink content */
     -fx-effect: dropshadow(gaussian, rgba(101, 231, 255, 0.3), 8, 0.6, 0, 0),
                 dropshadow(gaussian, rgba(0, 0, 0, 0.5), 6, 0, 0, 2);  /* softer shadow */
-    -fx-alignment: center;
-    -fx-min-width: 130;
-    -fx-pref-width: 130;
-    -fx-max-width: 130;
+    -fx-alignment: top-center;
+    -fx-max-width: Infinity;               /* auto-resize to parent width */
 }
 
 /* ============================================
@@ -253,6 +252,8 @@
     -fx-alignment: center;
     -fx-text-alignment: center;
     -fx-padding: 0 0 4 0;                 /* small spacing below title */
+    -fx-wrap-text: false;                 /* prevent text from being squeezed */
+    -fx-label-padding: 0 10 0 10;         /* padding for text visibility */
 }
 
 /* ============================================
@@ -266,6 +267,8 @@
     -fx-letter-spacing: 1px;               /* evenly spaced */
     -fx-alignment: center;
     -fx-text-alignment: center;
+    -fx-wrap-text: false;                  /* prevent text from being squeezed */
+    -fx-label-padding: 0 10 0 10;          /* padding for text visibility */
 }
 
 /* ============================================
@@ -279,8 +282,9 @@
     -fx-background-radius: 8;
     -fx-border-width: 2;
     -fx-border-radius: 8;
+    -fx-border-insets: 0;                  /* don't let borders shrink content */
     -fx-alignment: center;
-    -fx-min-width: 100;
+    -fx-max-width: Infinity;                /* auto-resize to parent width */
 }
 
 /* Score panel - Cyan glow */
@@ -311,6 +315,8 @@
     -fx-font-weight: bold;
     -fx-letter-spacing: 1.5px;
     -fx-font-family: 'Arial', sans-serif;
+    -fx-wrap-text: false;                  /* prevent text from being squeezed */
+    -fx-label-padding: 0 10 0 10;           /* padding for text visibility */
 }
 
 /* Base value style */
@@ -331,4 +337,6 @@
     -fx-font-family: "Let's go Digital", 'Courier New', monospace;
     -fx-alignment: center;
     -fx-letter-spacing: 1.5px;
+    -fx-wrap-text: false;            /* prevent text from being squeezed */
+    -fx-label-padding: 0 10 0 10;     /* padding for text visibility */
 }

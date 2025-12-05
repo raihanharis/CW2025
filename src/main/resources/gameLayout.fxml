@@ -28,12 +28,13 @@
         <VBox fx:id="leftPanel" 
               alignment="TOP_CENTER" 
               spacing="16"
-              style="-fx-background-color: transparent; -fx-padding: 0; -fx-min-width: 130; -fx-pref-width: 130; -fx-max-width: 130;">
+              style="-fx-background-color: transparent; -fx-padding: 0; -fx-min-width: 160; -fx-pref-width: 160; -fx-max-width: 160;">
             
             <!-- BOX 1: MAIN INFO PANEL -->
             <VBox alignment="TOP_CENTER" 
                   spacing="18"
-                  styleClass="main-info-box">
+                  styleClass="main-info-box"
+                  VBox.vgrow="NEVER">
                 
                 <!-- TETRIS Logo (Top) -->
                 <Label text="TETRIS" style="-fx-text-fill: #00d4ff; -fx-font-size: 24; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, #00d4ff, 10, 0.5, 0, 0);"/>
@@ -66,21 +67,20 @@
                 <Button fx:id="restartButton" 
                         text="⟳ RESTART"
                         onAction="#onRestartClick"
-                        prefWidth="110"
                         styleClass="game-button restart-button"/>
                 
                 <!-- Pause Button -->
                 <Button fx:id="pauseButton"
                         text="⏸ PAUSE"
                         onAction="#onPauseClick"
-                        prefWidth="110"
                         styleClass="game-button pause-resume-button"/>
             </VBox>
             
             <!-- BOX 2: CONTROLS PANEL -->
-            <VBox alignment="CENTER" 
+            <VBox alignment="TOP_CENTER" 
                   spacing="8"
-                  styleClass="controls-panel-box">
+                  styleClass="controls-panel-box"
+                  VBox.vgrow="NEVER">
                 
                 <!-- CONTROLS Title -->
                 <Label text="CONTROLS" styleClass="controls-title"/>
@@ -98,10 +98,15 @@
         <VBox alignment="TOP_CENTER" 
               styleClass="playfield-container"
               HBox.hgrow="NEVER">
-            <GridPane fx:id="gamePanel" 
-                      hgap="1" 
-                      vgap="1"
-                      styleClass="playfield-grid"/>
+            <!-- StackPane to overlay GameOverPanel on top of board -->
+            <StackPane fx:id="gameBoardStackPane" alignment="CENTER">
+                <GridPane fx:id="gamePanel" 
+                          hgap="1" 
+                          vgap="1"
+                          styleClass="playfield-grid"/>
+                <!-- Game Over Overlay - Centered relative to board only -->
+                <GameOverPanel fx:id="gameOverPanel" visible="false"/>
+            </StackPane>
         </VBox>
 
         <!-- RIGHT: Next Preview Panel -->
@@ -155,9 +160,6 @@
                text="PRESS P TO RESUME" 
                style="-fx-font-size: 42; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Arial Black';"/>
     </VBox>
-
-    <!-- Game Over Overlay -->
-    <GameOverPanel fx:id="gameOverPanel" visible="false"/>
 
     <stylesheets>
         <URL value="@window_style.css"/>
