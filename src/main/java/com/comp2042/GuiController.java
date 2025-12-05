@@ -73,6 +73,7 @@ public class GuiController implements Initializable {
     @FXML private Label scoreLabel;
     @FXML private Label levelLabel;
     @FXML private Label linesLabel;
+    @FXML private Label highScoreValue;
     @FXML private Button restartButton;
     @FXML private Button pauseButton;
 
@@ -809,6 +810,7 @@ public class GuiController implements Initializable {
     
     /**
      * Resets game statistics for a new game.
+     * High score is NOT reset - it persists during the app session.
      */
     private void resetStats() {
         totalLinesCleared = 0;
@@ -818,6 +820,19 @@ public class GuiController implements Initializable {
         }
         if (levelLabel != null) {
             levelLabel.setText("1");
+        }
+        // High score is NOT reset here - it persists
+    }
+    
+    /**
+     * Updates the high score display.
+     * Called when a new high score is achieved.
+     * 
+     * @param highScore the new high score value
+     */
+    public void updateHighScore(int highScore) {
+        if (highScoreValue != null) {
+            highScoreValue.setText(String.valueOf(highScore));
         }
     }
 

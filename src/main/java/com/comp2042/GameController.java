@@ -4,6 +4,9 @@ public class GameController implements InputEventListener {
 
     private final Board board;
     private final GuiController gui;
+    
+    // High score persists during app session (static field)
+    private static int highScore = 0;
 
     public GameController(GuiController gui) {
         this.gui = gui;
@@ -15,6 +18,9 @@ public class GameController implements InputEventListener {
         gui.setEventListener(this);
         gui.initGameView(board.getBoardMatrix(), board.getViewData());
         gui.bindScore(board.getScore().scoreProperty());
+        
+        // Initialize high score display
+        gui.updateHighScore(highScore);
     }
 
     @Override
@@ -32,6 +38,12 @@ public class GameController implements InputEventListener {
             }
 
             if (board.createNewBrick()) {
+                // Check and update high score when game ends
+                int currentScore = board.getScore().scoreProperty().get();
+                if (currentScore > highScore) {
+                    highScore = currentScore;
+                    gui.updateHighScore(highScore);
+                }
                 gui.gameOver();
             }
         } else {
@@ -79,6 +91,12 @@ public class GameController implements InputEventListener {
         }
 
         if (board.createNewBrick()) {
+            // Check and update high score when game ends
+            int currentScore = board.getScore().scoreProperty().get();
+            if (currentScore > highScore) {
+                highScore = currentScore;
+                gui.updateHighScore(highScore);
+            }
             gui.gameOver();
         }
 

@@ -43,6 +43,12 @@
                 <Label fx:id="linesLabel" text="0" styleClass="linesValue"/>
             </VBox>
             
+            <!-- HIGH SCORE Section -->
+            <VBox alignment="CENTER" spacing="6" styleClass="stat-panel score-panel">
+                <Label text="HIGH SCORE" styleClass="stat-title"/>
+                <Label fx:id="highScoreValue" text="0" styleClass="scoreValue"/>
+            </VBox>
+            
             <!-- Restart Button (Unboxed) -->
             <Button fx:id="restartButton" 
                     text="⟳ RESTART"
