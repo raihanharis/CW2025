@@ -47,6 +47,7 @@ public class GuiController implements Initializable {
     @FXML private Label nextLabel;
     @FXML private GridPane brickPanel;
     @FXML private Group groupNotification;
+    @FXML private VBox pauseOverlay;
     @FXML private GameOverPanel gameOverPanel;
 
     private Rectangle[][] boardTiles;
@@ -151,9 +152,22 @@ public class GuiController implements Initializable {
     }
 
     private void handleKeyPress(KeyEvent event) {
-        if (isPause.get() || isGameOver.get()) return;
-
         KeyCode code = event.getCode();
+        
+        // P key always works (to toggle pause)
+        if (code == KeyCode.P && !isGameOver.get()) {
+            togglePause();
+            return;
+        }
+        
+        // R key works even when paused (to start new game)
+        if (code == KeyCode.R) {
+            newGame(null);
+            return;
+        }
+        
+        // All other keys blocked when paused or game over
+        if (isPause.get() || isGameOver.get()) return;
 
         switch (code) {
             case LEFT, A -> refreshView(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
@@ -161,8 +175,6 @@ public class GuiController implements Initializable {
             case UP, W -> refreshView(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
             case DOWN, S -> handleDown(new MoveEvent(EventType.DOWN, EventSource.USER));
             case SPACE -> handleHardDrop();
-            case P -> togglePause();
-            case R -> newGame(null);
         }
     }
 
@@ -357,10 +369,14 @@ public class GuiController implements Initializable {
 
     private void togglePause() {
         if (isPause.get()) {
+            // Resume game
             isPause.set(false);
+            pauseOverlay.setVisible(false);
             timeline.play();
         } else {
+            // Pause game
             isPause.set(true);
+            pauseOverlay.setVisible(true);
             timeline.stop();
         }
     }
@@ -381,6 +397,7 @@ public class GuiController implements Initializable {
         isGameOver.set(false);
         isPause.set(false);
         gameOverPanel.setVisible(false);
+        pauseOverlay.setVisible(false);
         eventListener.createNewGame();
         rootPane.requestFocus();
     }
