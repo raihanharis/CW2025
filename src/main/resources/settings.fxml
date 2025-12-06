@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import java.net.URL?>
+
+<!-- Settings Scene -->
+<VBox fx:id="settingsRoot"
+      fx:controller="com.comp2042.SettingsController"
+      xmlns:fx="http://javafx.com/fxml"
+      alignment="CENTER"
+      spacing="40"
+      style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000); -fx-padding: 60;">
+    
+    <!-- SETTINGS Title -->
+    <Label text="SETTINGS"
+           styleClass="settings-title"/>
+    
+    <!-- Settings Container -->
+    <VBox alignment="CENTER" spacing="30" style="-fx-min-width: 400;">
+        
+        <!-- Volume Control Section -->
+        <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
+            <Label text="MASTER VOLUME" styleClass="settings-label"/>
+            <HBox alignment="CENTER" spacing="15">
+                <Slider fx:id="volumeSlider"
+                        min="0"
+                        max="100"
+                        value="100"
+                        prefWidth="300"
+                        showTickLabels="false"
+                        showTickMarks="true"
+                        majorTickUnit="25"
+                        minorTickCount="5"/>
+                <Label fx:id="volumeLabel"
+                       text="100%"
+                       styleClass="settings-value"/>
+            </HBox>
+        </VBox>
+        
+        <!-- Music Toggle Section -->
+        <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
+            <Label text="MUSIC" styleClass="settings-label"/>
+            <ToggleButton fx:id="musicToggle"
+                          text="ON"
+                          styleClass="settings-toggle"/>
+        </VBox>
+        
+        <!-- SFX Toggle Section -->
+        <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
+            <Label text="SFX" styleClass="settings-label"/>
+            <ToggleButton fx:id="sfxToggle"
+                          text="ON"
+                          styleClass="settings-toggle"/>
+        </VBox>
+        
+        <!-- Back Button -->
+        <Button fx:id="backButton"
+                text="BACK"
+                onAction="#onBackClick"
+                styleClass="main-menu-button"
+                prefWidth="200"
+                prefHeight="50"/>
+    </VBox>
+    
+    <stylesheets>
+        <URL value="@window_style.css"/>
+    </stylesheets>
+</VBox>
+

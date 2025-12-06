@@ -265,15 +265,35 @@ public class MainMenuController implements Initializable {
     }
     
     /**
-     * Opens the settings window (placeholder implementation).
+     * Opens the settings scene.
      */
     @FXML
     private void openSettings(ActionEvent event) {
-        Alert settingsAlert = new Alert(Alert.AlertType.INFORMATION);
-        settingsAlert.setTitle("Settings");
-        settingsAlert.setHeaderText("Settings");
-        settingsAlert.setContentText("Settings coming soon!");
-        settingsAlert.showAndWait();
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/settings.fxml")
+            );
+            
+            Parent settingsRoot = loader.load();
+            
+            // Get the SettingsController and set the primary stage
+            SettingsController settingsController = loader.getController();
+            settingsController.setPrimaryStage(primaryStage);
+            
+            // Create and set the settings scene
+            Scene settingsScene = new Scene(settingsRoot, 900, 700);
+            settingsScene.setFill(javafx.scene.paint.Color.web("#000000"));
+            
+            if (primaryStage != null) {
+                primaryStage.setScene(settingsScene);
+                primaryStage.setTitle("Tetris - Settings");
+                settingsRoot.requestFocus();
+            }
+            
+        } catch (IOException e) {
+            System.err.println("Error loading settings scene: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     /**
