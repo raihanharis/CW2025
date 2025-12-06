@@ -54,6 +54,14 @@
                           styleClass="settings-toggle"/>
         </VBox>
         
+        <!-- Ghost Piece Toggle Section -->
+        <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
+            <Label text="SHOW GHOST PIECE" styleClass="settings-label"/>
+            <ToggleButton fx:id="ghostToggle"
+                          text="ON"
+                          styleClass="settings-toggle"/>
+        </VBox>
+        
         <!-- Back Button -->
         <Button fx:id="backButton"
                 text="BACK"

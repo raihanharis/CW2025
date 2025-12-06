@@ -35,6 +35,9 @@ public class SettingsController implements Initializable {
     @FXML
     private Button backButton;
     
+    @FXML
+    private ToggleButton ghostToggle;
+    
     private Stage primaryStage;
     private AudioManager audioManager;
     
@@ -53,6 +56,11 @@ public class SettingsController implements Initializable {
         
         sfxToggle.setSelected(audioManager.isSfxEnabled());
         sfxToggle.setText(audioManager.isSfxEnabled() ? "ON" : "OFF");
+        
+        // Initialize ghost piece toggle with saved setting (using ToggleButton like Music/SFX)
+        boolean ghostEnabled = audioManager.isGhostPieceEnabled();
+        ghostToggle.setSelected(ghostEnabled);
+        ghostToggle.setText(ghostEnabled ? "ON" : "OFF");
         
         // Volume slider listener - updates volume instantly
         volumeSlider.valueProperty().addListener(new ChangeListener<Number>() {
@@ -84,6 +92,15 @@ public class SettingsController implements Initializable {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 audioManager.setSfxEnabled(newValue);
                 sfxToggle.setText(newValue ? "ON" : "OFF");
+            }
+        });
+        
+        // Ghost piece toggle listener (same pattern as Music/SFX)
+        ghostToggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                audioManager.setGhostPieceEnabled(newValue);
+                ghostToggle.setText(newValue ? "ON" : "OFF");
             }
         });
     }

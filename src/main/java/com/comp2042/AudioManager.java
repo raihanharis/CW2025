@@ -17,6 +17,7 @@ public class AudioManager {
     private double masterVolume = 1.0;  // 0.0 to 1.0
     private boolean musicEnabled = true;
     private boolean sfxEnabled = true;
+    private boolean ghostPieceEnabled = true;  // Default ON
     
     private Preferences prefs;
     
@@ -39,6 +40,7 @@ public class AudioManager {
         masterVolume = prefs.getDouble("masterVolume", 1.0);
         musicEnabled = prefs.getBoolean("musicEnabled", true);
         sfxEnabled = prefs.getBoolean("sfxEnabled", true);
+        ghostPieceEnabled = prefs.getBoolean("ghostPieceEnabled", true);  // Default ON
     }
     
     /**
@@ -48,6 +50,7 @@ public class AudioManager {
         prefs.putDouble("masterVolume", masterVolume);
         prefs.putBoolean("musicEnabled", musicEnabled);
         prefs.putBoolean("sfxEnabled", sfxEnabled);
+        prefs.putBoolean("ghostPieceEnabled", ghostPieceEnabled);
     }
     
     /**
@@ -113,6 +116,21 @@ public class AudioManager {
      */
     public boolean isSfxEnabled() {
         return sfxEnabled;
+    }
+    
+    /**
+     * Sets whether the ghost piece is enabled.
+     */
+    public void setGhostPieceEnabled(boolean enabled) {
+        this.ghostPieceEnabled = enabled;
+        saveSettings();
+    }
+    
+    /**
+     * Gets whether the ghost piece is enabled.
+     */
+    public boolean isGhostPieceEnabled() {
+        return ghostPieceEnabled;
     }
     
     /**

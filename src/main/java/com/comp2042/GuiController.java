@@ -459,7 +459,15 @@ public class GuiController implements Initializable {
     public void refreshView(ViewData viewData) {
         lastViewData = viewData;
         drawBoard(viewData);
-        drawGhostBrick(viewData);  // Draw ghost first (behind active)
+        
+        // Draw ghost piece only if enabled in settings
+        if (AudioManager.getInstance().isGhostPieceEnabled()) {
+            drawGhostBrick(viewData);  // Draw ghost first (behind active)
+        } else {
+            // Hide ghost piece by making all tiles transparent
+            hideGhostBrick();
+        }
+        
         drawActiveBrick(viewData);
         drawNextBrick(viewData);
         drawNextBrick2(viewData);
@@ -497,6 +505,24 @@ public class GuiController implements Initializable {
                 tile.setFill(getGhostFill(mat[r][c]));
                 GridPane.setRowIndex(tile, visibleRow);
                 GridPane.setColumnIndex(tile, x + c);
+            }
+        }
+    }
+    
+    /**
+     * Hides the ghost piece by making all ghost tiles transparent.
+     * Called when ghost piece is disabled in settings.
+     */
+    private void hideGhostBrick() {
+        if (ghostBrickTiles == null) {
+            return;
+        }
+        
+        for (int r = 0; r < ghostBrickTiles.length; r++) {
+            for (int c = 0; c < ghostBrickTiles[r].length; c++) {
+                if (ghostBrickTiles[r][c] != null) {
+                    ghostBrickTiles[r][c].setFill(Color.TRANSPARENT);
+                }
             }
         }
     }
