@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import java.net.URL?>
+
+<!-- Main Menu Scene -->
+<VBox fx:id="mainMenuRoot"
+      fx:controller="com.comp2042.MainMenuController"
+      xmlns:fx="http://javafx.com/fxml"
+      alignment="CENTER"
+      spacing="50"
+      style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000); -fx-padding: 60;">
+    
+    <!-- TETRIS Title -->
+    <Label fx:id="tetrisTitle"
+           text="TETRIS"
+           styleClass="main-menu-title"/>
+    
+    <!-- Button Container -->
+    <VBox alignment="CENTER" spacing="26">
+        <!-- START GAME Button -->
+        <Button fx:id="startGameButton"
+                text="START GAME"
+                onAction="#startGame"
+                styleClass="main-menu-button start-game-button"
+                prefWidth="280"
+                prefHeight="60"/>
+        
+        <!-- SETTINGS Button -->
+        <Button fx:id="settingsButton"
+                text="SETTINGS"
+                onAction="#openSettings"
+                styleClass="main-menu-button settings-button"
+                prefWidth="280"
+                prefHeight="60"/>
+        
+        <!-- EXIT Button -->
+        <Button fx:id="exitButton"
+                text="EXIT"
+                onAction="#exitGame"
+                styleClass="main-menu-button exit-button"
+                prefWidth="280"
+                prefHeight="60"/>
+    </VBox>
+    
+    <stylesheets>
+        <URL value="@window_style.css"/>
+    </stylesheets>
+</VBox>
+
