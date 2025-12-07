@@ -46,6 +46,7 @@ public class GameController implements InputEventListener {
             rowClearResult = board.clearRows();
 
             if (rowClearResult.getRowsCleared() > 0) {
+                // Add official Tetris Guideline base score (100/300/500/800)
                 board.getScore().add(rowClearResult.getPointsEarned());
                 gui.updateLinesCleared(rowClearResult.getRowsCleared());
                 // Show floating score popup at the cleared row location
@@ -105,6 +106,7 @@ public class GameController implements InputEventListener {
 
         RowClearResult result = board.clearRows();
         if (result.getRowsCleared() > 0) {
+            // Add official Tetris Guideline base score (100/300/500/800)
             board.getScore().add(result.getPointsEarned());
             gui.updateLinesCleared(result.getRowsCleared());
             // Show floating score popup at the cleared row location

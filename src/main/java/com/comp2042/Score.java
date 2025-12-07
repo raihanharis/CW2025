@@ -5,13 +5,18 @@ import javafx.beans.property.SimpleIntegerProperty;
 
 /**
  * Represents the player's score in the Tetris game.
+ * Uses official Tetris Guideline base scoring for line clears:
+ * - Single (1 line): 100 points
+ * - Double (2 lines): 300 points
+ * - Triple (3 lines): 500 points
+ * - Tetris (4 lines): 800 points
  *
  * Uses JavaFX's {@link IntegerProperty} so the GUI can automatically update
  * whenever the score changes (data binding).
  *
  * Responsibilities:
  * - Store the current score
- * - Allow controlled scoring updates
+ * - Allow controlled scoring updates (adds points directly, no formulas)
  * - Provide a reset mechanism for new games
  * - Expose a bindable property for the GUI
  */

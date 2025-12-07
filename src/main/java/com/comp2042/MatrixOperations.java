@@ -102,13 +102,14 @@ public final class MatrixOperations {
 
     /**
      * Checks the matrix for full rows, removes them, shifts everything downward,
-     * and calculates bonus points.
+     * and calculates points using official Tetris Guideline base scoring.
      *
      * @param matrix the current game matrix
      * @return a RowClearResult object containing:
-     *         - number of cleared rows
+     *         - number of cleared rows (1-4)
      *         - updated matrix after removal
-     *         - points earned
+     *         - base points earned (100/300/500/800)
+     *         - indices of cleared rows
      */
     public static RowClearResult checkRemoving(final int[][] matrix) {
         int height = matrix.length;
@@ -148,13 +149,14 @@ public final class MatrixOperations {
             }
         }
 
-        // Official Tetris scoring system
+        // Official Tetris Guideline base scoring system
+        // Uses fixed point values (not formulas or multipliers)
         int rowsCleared = clearedRowIndices.size();
         int pointsEarned = switch (rowsCleared) {
-            case 1 -> 100;  // Single line clear
-            case 2 -> 300;  // Double line clear
-            case 3 -> 500;  // Triple line clear
-            case 4 -> 800;  // Tetris (4 lines)
+            case 1 -> 100;  // Single (1 line): 100 points
+            case 2 -> 300;  // Double (2 lines): 300 points
+            case 3 -> 500;  // Triple (3 lines): 500 points
+            case 4 -> 800;  // Tetris (4 lines): 800 points
             default -> 0;   // Should not happen, but handle gracefully
         };
 

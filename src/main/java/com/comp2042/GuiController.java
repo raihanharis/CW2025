@@ -964,12 +964,13 @@ public class GuiController implements Initializable {
             return;
         }
         
-        // Convert lines cleared to official Tetris score
+        // Convert lines cleared to official Tetris Guideline base score
+        // Uses fixed point values: 100/300/500/800 (not formulas)
         int score = switch (linesCleared) {
-            case 1 -> 100;  // Single line clear
-            case 2 -> 300;  // Double line clear
-            case 3 -> 500;  // Triple line clear
-            case 4 -> 800;  // Tetris (4 lines)
+            case 1 -> 100;  // Single (1 line): 100 points
+            case 2 -> 300;  // Double (2 lines): 300 points
+            case 3 -> 500;  // Triple (3 lines): 500 points
+            case 4 -> 800;  // Tetris (4 lines): 800 points
             default -> 0;   // Should not happen
         };
         

@@ -5,10 +5,16 @@ import java.util.List;
 
 /**
  * Stores the result of clearing one or more rows in the Tetris game.
+ * Uses official Tetris Guideline base scoring:
+ * - Single (1 line): 100 points
+ * - Double (2 lines): 300 points
+ * - Triple (3 lines): 500 points
+ * - Tetris (4 lines): 800 points
+ * 
  * This includes:
- * - how many rows were cleared,
+ * - how many rows were cleared (1-4),
  * - the updated game matrix after the clear,
- * - the points earned from clearing the rows,
+ * - the base points awarded (100/300/500/800),
  * - and the indices of the cleared rows.
  *
  * This class is immutable to ensure the result cannot be modified after creation.
