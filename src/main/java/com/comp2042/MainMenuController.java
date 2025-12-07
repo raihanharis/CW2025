@@ -251,8 +251,20 @@ public class MainMenuController implements Initializable {
             gameScene.setFill(javafx.scene.paint.Color.web("#000000"));
             
             if (primaryStage != null) {
+                // Set fullscreen BEFORE scene change to prevent exit
+                primaryStage.setFullScreen(true);
+                primaryStage.setFullScreenExitHint("");
+                primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                
                 primaryStage.setScene(gameScene);
                 primaryStage.setTitle("Tetris - Game");
+                
+                // Force fullscreen immediately after scene change
+                javafx.application.Platform.runLater(() -> {
+                    primaryStage.setFullScreen(true);
+                    primaryStage.setFullScreenExitHint("");
+                    primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                });
                 
                 // Request focus for keyboard input
                 gameRoot.requestFocus();
@@ -285,8 +297,21 @@ public class MainMenuController implements Initializable {
             settingsScene.setFill(javafx.scene.paint.Color.web("#000000"));
             
             if (primaryStage != null) {
+                // Set fullscreen BEFORE scene change to prevent exit
+                primaryStage.setFullScreen(true);
+                primaryStage.setFullScreenExitHint("");
+                primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                
                 primaryStage.setScene(settingsScene);
                 primaryStage.setTitle("Tetris - Settings");
+                
+                // Force fullscreen immediately after scene change
+                javafx.application.Platform.runLater(() -> {
+                    primaryStage.setFullScreen(true);
+                    primaryStage.setFullScreenExitHint("");
+                    primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                });
+                
                 settingsRoot.requestFocus();
             }
             

@@ -38,6 +38,9 @@ public class SettingsController implements Initializable {
     @FXML
     private ToggleButton ghostToggle;
     
+    @FXML
+    private ToggleButton hardDropToggle;
+    
     private Stage primaryStage;
     private AudioManager audioManager;
     
@@ -61,6 +64,11 @@ public class SettingsController implements Initializable {
         boolean ghostEnabled = audioManager.isGhostPieceEnabled();
         ghostToggle.setSelected(ghostEnabled);
         ghostToggle.setText(ghostEnabled ? "ON" : "OFF");
+        
+        // Initialize hard drop toggle with saved setting (default ON)
+        boolean hardDropEnabled = audioManager.isHardDropEnabled();
+        hardDropToggle.setSelected(hardDropEnabled);
+        hardDropToggle.setText(hardDropEnabled ? "ON" : "OFF");
         
         // Volume slider listener - updates volume instantly
         volumeSlider.valueProperty().addListener(new ChangeListener<Number>() {
@@ -103,6 +111,15 @@ public class SettingsController implements Initializable {
                 ghostToggle.setText(newValue ? "ON" : "OFF");
             }
         });
+        
+        // Hard drop toggle listener (same pattern as Music/SFX)
+        hardDropToggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                audioManager.setHardDropEnabled(newValue);
+                hardDropToggle.setText(newValue ? "ON" : "OFF");
+            }
+        });
     }
     
     /**
@@ -133,8 +150,21 @@ public class SettingsController implements Initializable {
             mainMenuScene.setFill(javafx.scene.paint.Color.web("#000000"));
             
             if (primaryStage != null) {
+                // Set fullscreen BEFORE scene change to prevent exit
+                primaryStage.setFullScreen(true);
+                primaryStage.setFullScreenExitHint("");
+                primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                
                 primaryStage.setScene(mainMenuScene);
                 primaryStage.setTitle("Tetris - Main Menu");
+                
+                // Force fullscreen immediately after scene change
+                javafx.application.Platform.runLater(() -> {
+                    primaryStage.setFullScreen(true);
+                    primaryStage.setFullScreenExitHint("");
+                    primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                });
+                
                 mainMenuRoot.requestFocus();
             }
             

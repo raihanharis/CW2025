@@ -18,6 +18,7 @@ public class AudioManager {
     private boolean musicEnabled = true;
     private boolean sfxEnabled = true;
     private boolean ghostPieceEnabled = true;  // Default ON
+    private boolean hardDropEnabled = true;  // Default ON
     
     private Preferences prefs;
     
@@ -41,6 +42,7 @@ public class AudioManager {
         musicEnabled = prefs.getBoolean("musicEnabled", true);
         sfxEnabled = prefs.getBoolean("sfxEnabled", true);
         ghostPieceEnabled = prefs.getBoolean("ghostPieceEnabled", true);  // Default ON
+        hardDropEnabled = prefs.getBoolean("hardDropEnabled", true);  // Default ON
     }
     
     /**
@@ -51,6 +53,7 @@ public class AudioManager {
         prefs.putBoolean("musicEnabled", musicEnabled);
         prefs.putBoolean("sfxEnabled", sfxEnabled);
         prefs.putBoolean("ghostPieceEnabled", ghostPieceEnabled);
+        prefs.putBoolean("hardDropEnabled", hardDropEnabled);
     }
     
     /**
@@ -131,6 +134,21 @@ public class AudioManager {
      */
     public boolean isGhostPieceEnabled() {
         return ghostPieceEnabled;
+    }
+    
+    /**
+     * Sets whether hard drop is enabled.
+     */
+    public void setHardDropEnabled(boolean enabled) {
+        this.hardDropEnabled = enabled;
+        saveSettings();
+    }
+    
+    /**
+     * Gets whether hard drop is enabled.
+     */
+    public boolean isHardDropEnabled() {
+        return hardDropEnabled;
     }
     
     /**

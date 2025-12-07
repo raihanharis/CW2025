@@ -248,6 +248,18 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 234, 255, 0.4), 6, 0.5, 0, 0);  /* Soft cyan glow */
 }
 
+/* Settings BACK Button - Enhanced Visibility */
+.settings-back-button .text {
+    -fx-fill: #45eaff;                         /* Bright cyan for better visibility */
+    -fx-effect: dropshadow(gaussian, rgba(69, 234, 255, 0.8), 8, 0.4, 0, 0);  /* Stronger glowing text-shadow */
+    -fx-font-weight: bold;                     /* Make text bolder for better visibility */
+}
+
+.settings-back-button:hover .text {
+    -fx-fill: #5affff;                         /* Even brighter on hover */
+    -fx-effect: dropshadow(gaussian, rgba(90, 255, 255, 1.0), 10, 0.6, 0, 0);  /* Stronger glow on hover */
+}
+
 /* Hover State - Subtle Scale, Brighter Background, Stronger Glow, Vertical Lift */
 .main-menu-button:hover {
     -fx-background-color: linear-gradient(to bottom, #f0f0f0, #d8d8d8);  /* Slightly brighter background */
@@ -279,15 +291,15 @@
     -fx-font-family: "Press Start 2P", "VT323", "ArcadeClassic", "Let's go Digital", 'Courier New', monospace;
     -fx-effect: dropshadow(gaussian, rgba(77, 232, 255, 0.3), 6, 0.4, 0, 0);  /* Small, soft outer glow */
     -fx-letter-spacing: 3px;
-    -fx-padding: 0 0 30 0;
+    -fx-padding: 0 0 15 0;
     -fx-alignment: center;
 }
 
 /* Settings Section Container */
 .settings-section {
     -fx-alignment: center;
-    -fx-spacing: 10;
-    -fx-padding: 20;
+    -fx-spacing: 8;
+    -fx-padding: 8;
 }
 
 /* Settings Label (MASTER VOLUME, MUSIC, SFX) */

@@ -333,7 +333,12 @@ public class GuiController implements Initializable {
             case RIGHT, D -> refreshView(eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER)));
             case UP, W -> refreshView(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
             case DOWN, S -> handleDown(new MoveEvent(EventType.DOWN, EventSource.USER));
-            case SPACE -> handleHardDrop();
+            case SPACE -> {
+                // Only allow hard drop if enabled in settings
+                if (AudioManager.getInstance().isHardDropEnabled()) {
+                    handleHardDrop();
+                }
+            }
         }
     }
 
@@ -1007,8 +1012,20 @@ public class GuiController implements Initializable {
             mainMenuScene.setFill(javafx.scene.paint.Color.web("#000000"));
             
             if (primaryStage != null) {
+                // Set fullscreen BEFORE scene change to prevent exit
+                primaryStage.setFullScreen(true);
+                primaryStage.setFullScreenExitHint("");
+                primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                
                 primaryStage.setScene(mainMenuScene);
                 primaryStage.setTitle("Tetris");
+                
+                // Force fullscreen immediately after scene change
+                javafx.application.Platform.runLater(() -> {
+                    primaryStage.setFullScreen(true);
+                    primaryStage.setFullScreenExitHint("");
+                    primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                });
                 
                 // Request focus for keyboard input
                 mainMenuRoot.requestFocus();

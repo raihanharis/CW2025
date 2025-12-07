@@ -9,15 +9,16 @@
       fx:controller="com.comp2042.SettingsController"
       xmlns:fx="http://javafx.com/fxml"
       alignment="CENTER"
-      spacing="40"
-      style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000); -fx-padding: 60;">
+      spacing="25"
+      VBox.vgrow="ALWAYS"
+      style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000); -fx-padding: 30;">
     
     <!-- SETTINGS Title -->
     <Label text="SETTINGS"
            styleClass="settings-title"/>
     
     <!-- Settings Container -->
-    <VBox alignment="CENTER" spacing="30" style="-fx-min-width: 400;">
+    <VBox alignment="CENTER" spacing="22" style="-fx-min-width: 400;">
         
         <!-- Volume Control Section -->
         <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
@@ -62,11 +63,22 @@
                           styleClass="settings-toggle"/>
         </VBox>
         
+        <!-- Hard Drop Toggle Section -->
+        <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
+            <Label text="HARD DROP" styleClass="settings-label"/>
+            <ToggleButton fx:id="hardDropToggle"
+                          text="ON"
+                          styleClass="settings-toggle"/>
+        </VBox>
+        
+        <!-- Spacer before Back Button for breathing room -->
+        <Region prefHeight="18"/>
+        
         <!-- Back Button -->
         <Button fx:id="backButton"
                 text="BACK"
                 onAction="#onBackClick"
-                styleClass="main-menu-button"
+                styleClass="main-menu-button settings-back-button"
                 prefWidth="200"
                 prefHeight="50"/>
     </VBox>

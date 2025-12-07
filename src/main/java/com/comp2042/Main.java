@@ -32,6 +32,24 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(500);
         primaryStage.setMinHeight(550);
+        
+        // Enable fullscreen mode and prevent accidental exit
+        primaryStage.setFullScreen(true);
+        primaryStage.setFullScreenExitHint("");  // Hide the exit hint
+        primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);  // Disable ESC to exit fullscreen
+        
+        // Add listener to keep fullscreen always enabled
+        primaryStage.fullScreenProperty().addListener((obs, wasFullScreen, isNowFullScreen) -> {
+            if (!isNowFullScreen && wasFullScreen) {
+                // Immediately restore fullscreen if it was turned off
+                javafx.application.Platform.runLater(() -> {
+                    primaryStage.setFullScreen(true);
+                    primaryStage.setFullScreenExitHint("");
+                    primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                });
+            }
+        });
+        
         primaryStage.show();
         
         // Request focus for keyboard input
