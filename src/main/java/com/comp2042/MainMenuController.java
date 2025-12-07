@@ -246,6 +246,9 @@ public class MainMenuController implements Initializable {
             // Set the primary stage reference in GuiController for scene switching
             gui.setPrimaryStage(primaryStage);
             
+            // Update Hard Drop label visibility based on current settings
+            gui.updateHardDropLabelVisibility();
+            
             // Create and set the game scene
             Scene gameScene = new Scene(gameRoot, 900, 700);
             gameScene.setFill(javafx.scene.paint.Color.web("#000000"));

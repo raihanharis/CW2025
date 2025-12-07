@@ -95,7 +95,7 @@
                 <Label text="← →  Move" styleClass="control-text"/>
                 <Label text="↑    Rotate" styleClass="control-text"/>
                 <Label text="↓    Soft Drop" styleClass="control-text"/>
-                <Label text="SPACE Hard Drop" styleClass="control-text"/>
+                <Label fx:id="hardDropLabel" text="SPACE Hard Drop" styleClass="control-text"/>
                 <Label text="P    Pause" styleClass="control-text"/>
             </VBox>
         </VBox>

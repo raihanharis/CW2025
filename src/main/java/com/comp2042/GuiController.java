@@ -81,6 +81,7 @@ public class GuiController implements Initializable {
     @FXML private Button restartButton;
     @FXML private Button pauseButton;
     @FXML private Button mainMenuButton;
+    @FXML private Label hardDropLabel;  // Hard Drop control label
 
     private Rectangle[][] boardTiles;
     private Rectangle[][] activeBrickTiles;
@@ -130,9 +131,24 @@ public class GuiController implements Initializable {
         // Initialize button animations
         initializeButtonAnimations();
         
+        // Update Hard Drop label visibility based on settings
+        updateHardDropLabelVisibility();
+        
         // Add resize listener for scaling
         rootPane.widthProperty().addListener((obs, oldVal, newVal) -> handleResize());
         rootPane.heightProperty().addListener((obs, oldVal, newVal) -> handleResize());
+    }
+    
+    /**
+     * Updates the Hard Drop label visibility based on the settings.
+     * Called on initialization and when returning from settings.
+     */
+    public void updateHardDropLabelVisibility() {
+        if (hardDropLabel != null) {
+            boolean hardDropEnabled = AudioManager.getInstance().isHardDropEnabled();
+            hardDropLabel.setVisible(hardDropEnabled);
+            hardDropLabel.setManaged(hardDropEnabled);  // Remove from layout when hidden
+        }
     }
     
     /**
