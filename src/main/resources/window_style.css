@@ -228,6 +228,10 @@
     -fx-background-insets: 0;
     -fx-border-insets: 0;
     -fx-opacity: 1.0;                          /* ALWAYS VISIBLE */
+    -fx-mouse-transparent: false;              /* Ensure buttons are clickable */
+    -fx-disabled: false;                       /* Ensure buttons are enabled */
+    -fx-focus-traversable: true;               /* Allow keyboard focus */
+    -fx-pick-on-bounds: true;                  /* Ensure entire button area is clickable */
     /* CSS transitions for smooth hover/press effects (150-200ms) */
 }
 

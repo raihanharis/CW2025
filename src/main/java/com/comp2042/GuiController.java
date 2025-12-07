@@ -2,8 +2,10 @@ package com.comp2042;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
 import javafx.animation.Animation;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -20,12 +22,16 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
 import javafx.event.ActionEvent;
 import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
@@ -69,6 +75,7 @@ public class GuiController implements Initializable {
     @FXML private VBox nextPreviewFrame2;
     @FXML private GridPane brickPanel2;
     @FXML private Group groupNotification;
+    @FXML private Pane scoreOverlay;
     @FXML private VBox pauseOverlay;
     @FXML private Label pauseLabel;
     @FXML private GameOverPanel gameOverPanel;
@@ -359,10 +366,29 @@ public class GuiController implements Initializable {
     }
 
     public void initGameView(int[][] boardMatrix, ViewData viewData) {
-        lastViewData = viewData;
-        
-        // Clear existing tiles
-        gamePanel.getChildren().clear();
+        try {
+            System.out.println("initGameView called with boardMatrix: " + (boardMatrix != null ? boardMatrix.length + "x" + (boardMatrix.length > 0 ? boardMatrix[0].length : 0) : "null"));
+            System.out.println("viewData: " + (viewData != null ? "not null" : "null"));
+            System.out.println("gamePanel: " + (gamePanel != null ? "not null" : "null"));
+            
+            if (gamePanel == null) {
+                System.err.println("ERROR: gamePanel is null in initGameView!");
+                return;
+            }
+            
+            if (boardMatrix == null || boardMatrix.length == 0) {
+                System.err.println("ERROR: boardMatrix is null or empty in initGameView!");
+                return;
+            }
+            
+            lastViewData = viewData;
+            
+            // Ensure game panel is visible
+            gamePanel.setVisible(true);
+            gamePanel.setManaged(true);
+            
+            // Clear existing tiles
+            gamePanel.getChildren().clear();
         brickPanel.getChildren().clear();
         if (brickPanel2 != null) {
             brickPanel2.getChildren().clear();
@@ -436,6 +462,8 @@ public class GuiController implements Initializable {
         // Both preview frames use fixed identical size from CSS (90x90)
         // No dynamic sizing needed - boxes remain identical
         
+        System.out.println("initGameView: First preview created, creating second preview...");
+        
         // Create second next brick tiles (NEXT 2)
         if (brickPanel2 != null) {
             int[][] next2 = viewData.getNextBrick2Data();
@@ -463,18 +491,36 @@ public class GuiController implements Initializable {
         
         // No animations - boxes remain static
 
+        System.out.println("initGameView: Calling refreshView...");
         refreshView(viewData);
+        System.out.println("initGameView: refreshView completed");
         
         // Request focus for keyboard input
-        rootPane.requestFocus();
+        if (rootPane != null) {
+            rootPane.requestFocus();
+            System.out.println("initGameView: Focus requested on rootPane");
+        }
 
         // Start game loop
+        System.out.println("initGameView: Starting game timeline...");
         timeline = new Timeline(new KeyFrame(
                 Duration.millis(400),
                 e -> handleDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
         ));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
+        System.out.println("initGameView: Timeline started!");
+        System.out.println("initGameView: COMPLETED SUCCESSFULLY!");
+        
+        } catch (Exception e) {
+            System.err.println("========================================");
+            System.err.println("CRITICAL ERROR in initGameView():");
+            System.err.println("========================================");
+            System.err.println("Exception type: " + e.getClass().getName());
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("========================================");
+        }
     }
 
     public void refreshView(ViewData viewData) {
@@ -903,6 +949,138 @@ public class GuiController implements Initializable {
             highScoreValue.setText(String.valueOf(highScore));
         }
     }
+    
+    /**
+     * Shows a floating score popup animation when lines are cleared.
+     * Uses official Tetris scoring system and positions popup directly above the cleared row.
+     * The popup appears in an overlay Pane above the gameplay grid, so it never affects layout.
+     * 
+     * @param linesCleared Number of lines cleared (1-4)
+     * @param clearedRowIndex The row index where the line was cleared (0-based from top of entire board including hidden rows)
+     */
+    public void showScorePopup(int linesCleared, int clearedRowIndex) {
+        if (gamePanel == null || scoreOverlay == null) {
+            System.err.println("WARNING: Cannot show score popup - gamePanel or scoreOverlay is null");
+            return;
+        }
+        
+        // Convert lines cleared to official Tetris score
+        int score = switch (linesCleared) {
+            case 1 -> 100;  // Single line clear
+            case 2 -> 300;  // Double line clear
+            case 3 -> 500;  // Triple line clear
+            case 4 -> 800;  // Tetris (4 lines)
+            default -> 0;   // Should not happen
+        };
+        
+        if (score == 0) {
+            return; // Don't show popup for invalid line counts
+        }
+        
+        // Create the popup text with neon styling and black outline
+        Text popupText = new Text("+" + score);
+        popupText.setFont(Font.font("Press Start 2P", FontWeight.BOLD, 30));
+        popupText.setBoundsType(TextBoundsType.VISUAL);
+        
+        // Set bright neon color based on line count
+        Color textColor = switch (linesCleared) {
+            case 1 -> Color.web("#00ffff");  // Cyan for single
+            case 2 -> Color.web("#00ff88");  // Lime green for double
+            case 3 -> Color.web("#ffff00");  // Yellow for triple
+            case 4 -> Color.web("#ff00ff");  // Magenta for Tetris
+            default -> Color.web("#00ffff");
+        };
+        popupText.setFill(textColor);
+        
+        // Add black outline stroke for visibility
+        popupText.setStroke(Color.BLACK);
+        popupText.setStrokeWidth(2.0);
+        
+        // Add glow effect (DropShadow) behind text
+        DropShadow glow = new DropShadow();
+        glow.setColor(textColor.deriveColor(0, 1, 1, 0.7));
+        glow.setRadius(10);
+        glow.setSpread(0.5);
+        popupText.setEffect(glow);
+        
+        // Make text non-interactive (doesn't block input)
+        popupText.setMouseTransparent(true);
+        popupText.setPickOnBounds(false);
+        
+        // Add to score overlay Pane (NOT gamePanel to avoid layout shifts)
+        scoreOverlay.getChildren().add(popupText);
+        
+        // Force layout to get actual text bounds
+        popupText.applyCss();
+        
+        // Calculate position using pixel coordinates relative to gamePanel
+        // Get gamePanel's position in the scene
+        javafx.geometry.Bounds gamePanelBounds = gamePanel.localToScene(gamePanel.getBoundsInLocal());
+        javafx.geometry.Bounds overlayBounds = scoreOverlay.localToScene(scoreOverlay.getBoundsInLocal());
+        
+        // X position: center of gamePanel, adjusted for overlay coordinate space
+        double textWidth = popupText.getBoundsInLocal().getWidth();
+        double boardCenterX = gamePanelBounds.getMinX() + (gamePanelBounds.getWidth() / 2.0) - overlayBounds.getMinX();
+        double popupX = boardCenterX - (textWidth / 2);
+        
+        // Y position: directly ABOVE the cleared line
+        // Formula: gamePanel.getLayoutY() + clearedRowIndex * BRICK_SIZE - 10
+        double popupY;
+        if (clearedRowIndex >= 0 && clearedRowIndex < TOTAL_ROWS) {
+            // clearedRowIndex is 0-based from top of entire board (including hidden rows)
+            // Convert to visible row index for positioning
+            int visibleRowIndex = clearedRowIndex - HIDDEN_ROWS;
+            if (visibleRowIndex < 0) {
+                visibleRowIndex = 0; // Clamp to top of visible area
+            }
+            // Position directly above the cleared row: clearedRowIndex * currentTileSize - 10
+            // Convert to overlay coordinate space
+            double rowYInPanel = visibleRowIndex * currentTileSize;
+            popupY = gamePanelBounds.getMinY() + rowYInPanel - overlayBounds.getMinY() - 10;
+            
+            // Ensure popup stays inside the gameplay area (never above or below grid)
+            double minY = gamePanelBounds.getMinY() - overlayBounds.getMinY();
+            double maxY = gamePanelBounds.getMinY() + (VISIBLE_ROWS * currentTileSize) - overlayBounds.getMinY();
+            if (popupY > maxY) {
+                popupY = maxY - 20; // Keep it inside with margin
+            }
+            if (popupY < minY) {
+                popupY = minY + 10; // Keep it at top with margin
+            }
+        } else {
+            // Fallback: center of visible board area
+            popupY = gamePanelBounds.getMinY() + ((VISIBLE_ROWS * currentTileSize) / 2.0) - overlayBounds.getMinY();
+        }
+        
+        // Set position
+        popupText.setLayoutX(popupX);
+        popupText.setLayoutY(popupY);
+        
+        // Create initial delay (300ms) before animation starts
+        Timeline delay = new Timeline(new KeyFrame(Duration.millis(300), e -> {
+            // Create fade out animation (1.0 -> 0.0 over 1200ms - longer duration)
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(1200), popupText);
+            fadeOut.setFromValue(1.0);
+            fadeOut.setToValue(0.0);
+            
+            // Create upward translation animation (move up by 10px - small rise, stays inside)
+            TranslateTransition translateUp = new TranslateTransition(Duration.millis(1200), popupText);
+            translateUp.setFromY(0);
+            translateUp.setToY(-10);
+            
+            // Combine both animations to run in parallel
+            ParallelTransition parallelTransition = new ParallelTransition(fadeOut, translateUp);
+            
+            // Remove the text from the scene graph when animation finishes
+            parallelTransition.setOnFinished(ev -> {
+                scoreOverlay.getChildren().remove(popupText);
+            });
+            
+            // Start the animation
+            parallelTransition.play();
+        }));
+        delay.play();
+    }
 
     public void gameOver() {
         isGameOver.set(true);
@@ -969,6 +1147,7 @@ public class GuiController implements Initializable {
     /**
      * Handles the Main Menu button click.
      * Stops the game and returns to the main menu.
+     * Music continues playing (unless disabled in settings).
      */
     @FXML
     private void onMainMenuClick(ActionEvent event) {
@@ -986,6 +1165,7 @@ public class GuiController implements Initializable {
             pauseOverlay.setOpacity(0.0);
         }
         
+        // Restore music volume if it was reduced during pause
         // Return to main menu
         returnToMainMenu();
         rootPane.requestFocus();

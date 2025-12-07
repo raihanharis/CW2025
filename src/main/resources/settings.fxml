@@ -20,7 +20,7 @@
     <!-- Settings Container -->
     <VBox alignment="CENTER" spacing="22" style="-fx-min-width: 400;">
         
-        <!-- Volume Control Section -->
+        <!-- Master Volume Section -->
         <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
             <Label text="MASTER VOLUME" styleClass="settings-label"/>
             <HBox alignment="CENTER" spacing="15">
@@ -37,14 +37,6 @@
                        text="100%"
                        styleClass="settings-value"/>
             </HBox>
-        </VBox>
-        
-        <!-- Music Toggle Section -->
-        <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
-            <Label text="MUSIC" styleClass="settings-label"/>
-            <ToggleButton fx:id="musicToggle"
-                          text="ON"
-                          styleClass="settings-toggle"/>
         </VBox>
         
         <!-- SFX Toggle Section -->

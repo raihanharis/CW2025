@@ -48,6 +48,9 @@ public class GameController implements InputEventListener {
             if (rowClearResult.getRowsCleared() > 0) {
                 board.getScore().add(rowClearResult.getPointsEarned());
                 gui.updateLinesCleared(rowClearResult.getRowsCleared());
+                // Show floating score popup at the cleared row location
+                int clearedRowIndex = rowClearResult.getFirstClearedRowIndex();
+                gui.showScorePopup(rowClearResult.getRowsCleared(), clearedRowIndex);
                 // Check and update high score in real-time after line clear
                 checkAndUpdateHighScore();
             }
@@ -104,6 +107,9 @@ public class GameController implements InputEventListener {
         if (result.getRowsCleared() > 0) {
             board.getScore().add(result.getPointsEarned());
             gui.updateLinesCleared(result.getRowsCleared());
+            // Show floating score popup at the cleared row location
+            int clearedRowIndex = result.getFirstClearedRowIndex();
+            gui.showScorePopup(result.getRowsCleared(), clearedRowIndex);
             // Check and update high score in real-time after line clear from hard drop
             checkAndUpdateHighScore();
         }

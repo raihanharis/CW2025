@@ -148,11 +148,17 @@ public final class MatrixOperations {
             }
         }
 
-        // Scoring formula: N² * 50 encourages clearing multiple rows at once
+        // Official Tetris scoring system
         int rowsCleared = clearedRowIndices.size();
-        int pointsEarned = 50 * rowsCleared * rowsCleared;
+        int pointsEarned = switch (rowsCleared) {
+            case 1 -> 100;  // Single line clear
+            case 2 -> 300;  // Double line clear
+            case 3 -> 500;  // Triple line clear
+            case 4 -> 800;  // Tetris (4 lines)
+            default -> 0;   // Should not happen, but handle gracefully
+        };
 
-        return new RowClearResult(rowsCleared, updatedMatrix, pointsEarned);
+        return new RowClearResult(rowsCleared, updatedMatrix, pointsEarned, clearedRowIndices);
     }
 
     /**

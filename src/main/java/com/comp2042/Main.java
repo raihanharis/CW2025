@@ -33,27 +33,39 @@ public class Main extends Application {
         primaryStage.setMinWidth(500);
         primaryStage.setMinHeight(550);
         
-        // Enable fullscreen mode and prevent accidental exit
-        primaryStage.setFullScreen(true);
-        primaryStage.setFullScreenExitHint("");  // Hide the exit hint
-        primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);  // Disable ESC to exit fullscreen
+        // Ensure the root is interactive and not blocking events
+        root.setMouseTransparent(false);
+        root.setDisable(false);
+        root.setPickOnBounds(true);
         
-        // Add listener to keep fullscreen always enabled
-        primaryStage.fullScreenProperty().addListener((obs, wasFullScreen, isNowFullScreen) -> {
-            if (!isNowFullScreen && wasFullScreen) {
-                // Immediately restore fullscreen if it was turned off
-                javafx.application.Platform.runLater(() -> {
-                    primaryStage.setFullScreen(true);
-                    primaryStage.setFullScreenExitHint("");
-                    primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
-                });
+        // Request focus on the root to ensure events work
+        javafx.application.Platform.runLater(() -> {
+            root.requestFocus();
+            System.out.println("Main menu root requested focus");
+        });
+        
+        // Show stage first
+        primaryStage.show();
+        
+        // TEMPORARILY DISABLE FULLSCREEN TO TEST IF IT'S BLOCKING BUTTONS
+        // Enable fullscreen mode after stage is shown
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // TEMPORARILY COMMENTED OUT TO TEST
+                // primaryStage.setFullScreen(true);
+                // primaryStage.setFullScreenExitHint("");  // Hide the exit hint
+                // primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);  // Disable ESC to exit fullscreen
+                System.out.println("Fullscreen temporarily disabled for testing");
+            } catch (Exception e) {
+                System.err.println("WARNING: Could not enable fullscreen: " + e.getMessage());
+                // Continue without fullscreen
             }
         });
         
-        primaryStage.show();
-        
         // Request focus for keyboard input
-        root.requestFocus();
+        javafx.application.Platform.runLater(() -> {
+            root.requestFocus();
+        });
     }
     
     /**

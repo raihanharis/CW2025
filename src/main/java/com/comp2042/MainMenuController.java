@@ -38,6 +38,9 @@ public class MainMenuController implements Initializable {
     @FXML
     private javafx.scene.control.Label tetrisTitle;
     
+    @FXML
+    private javafx.scene.layout.VBox mainMenuRoot;
+    
     private Stage primaryStage;
     
     // Scale transitions for hover and press effects (subtle animations only)
@@ -45,11 +48,167 @@ public class MainMenuController implements Initializable {
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Load arcade fonts for main menu
-        loadArcadeFonts();
-        
-        // Setup subtle hover/press animations (scale and translateY only)
-        setupButtonAnimations();
+        try {
+            System.out.println("MainMenuController.initialize() called");
+            
+            // Load arcade fonts for main menu (safe - won't break if fonts missing)
+            try {
+                loadArcadeFonts();
+            } catch (Exception e) {
+                System.err.println("WARNING: Could not load arcade fonts: " + e.getMessage());
+                // Continue without custom fonts
+            }
+            
+            // Setup subtle hover/press animations (safe - won't break if buttons null)
+            try {
+                setupButtonAnimations();
+            } catch (Exception e) {
+                System.err.println("WARNING: Could not setup button animations: " + e.getMessage());
+                // Continue without animations
+            }
+            
+            // Explicitly ensure all buttons are enabled and clickable
+            // Each button setup is wrapped in try-catch to prevent one failure from breaking others
+            if (startGameButton != null) {
+                try {
+                    startGameButton.setDisable(false);
+                    startGameButton.setMouseTransparent(false);
+                    startGameButton.setFocusTraversable(true);
+                    startGameButton.setPickOnBounds(true);
+                    System.out.println("Start Game button initialized and enabled");
+                } catch (Exception e) {
+                    System.err.println("WARNING: Error setting up startGameButton: " + e.getMessage());
+                }
+            } else {
+                System.err.println("ERROR: startGameButton is null!");
+            }
+            
+            if (settingsButton != null) {
+                try {
+                    settingsButton.setDisable(false);
+                    settingsButton.setMouseTransparent(false);
+                    settingsButton.setFocusTraversable(true);
+                    settingsButton.setPickOnBounds(true);
+                    System.out.println("Settings button initialized and enabled");
+                } catch (Exception e) {
+                    System.err.println("WARNING: Error setting up settingsButton: " + e.getMessage());
+                }
+            } else {
+                System.err.println("ERROR: settingsButton is null!");
+            }
+            
+            if (exitButton != null) {
+                try {
+                    exitButton.setDisable(false);
+                    exitButton.setMouseTransparent(false);
+                    exitButton.setFocusTraversable(true);
+                    exitButton.setPickOnBounds(true);
+                    System.out.println("Exit button initialized and enabled");
+                } catch (Exception e) {
+                    System.err.println("WARNING: Error setting up exitButton: " + e.getMessage());
+                }
+            } else {
+                System.err.println("ERROR: exitButton is null!");
+            }
+            
+            // Ensure main menu root doesn't block events
+            if (mainMenuRoot != null) {
+                mainMenuRoot.setMouseTransparent(false);
+                mainMenuRoot.setDisable(false);
+                mainMenuRoot.setPickOnBounds(true);
+            }
+            
+            // Explicitly wire up button handlers as a fallback (in case FXML wiring fails)
+            // Use both setOnAction AND addEventHandler to ensure clicks are captured
+            if (startGameButton != null) {
+                // Clear any existing handlers first
+                startGameButton.setOnAction(null);
+                startGameButton.setOnMouseClicked(null);
+                
+                // Set up ActionEvent handler
+                startGameButton.setOnAction(e -> {
+                    System.out.println(">>> START GAME ACTION EVENT FIRED! <<<");
+                    startGame(e);
+                });
+                
+                // Also add mouse click handler as backup (fires even if ActionEvent doesn't)
+                startGameButton.setOnMouseClicked(e -> {
+                    System.out.println(">>> START GAME MOUSE CLICKED! (x=" + e.getX() + ", y=" + e.getY() + ") <<<");
+                    if (!e.isConsumed()) {
+                        e.consume();
+                        startGame(new ActionEvent(startGameButton, null));
+                    }
+                });
+                
+                // Add diagnostic: check if button is actually visible and enabled
+                System.out.println("Start Game button state: visible=" + startGameButton.isVisible() + 
+                                 ", disabled=" + startGameButton.isDisabled() + 
+                                 ", mouseTransparent=" + startGameButton.isMouseTransparent() +
+                                 ", managed=" + startGameButton.isManaged());
+                System.out.println("Start Game button handler wired (both ActionEvent and MouseEvent)");
+            }
+            if (settingsButton != null) {
+                // Clear any existing handlers first
+                settingsButton.setOnAction(null);
+                settingsButton.setOnMouseClicked(null);
+                
+                // Set up ActionEvent handler
+                settingsButton.setOnAction(e -> {
+                    System.out.println(">>> SETTINGS ACTION EVENT FIRED! <<<");
+                    openSettings(e);
+                });
+                
+                // Also add mouse click handler as backup
+                settingsButton.setOnMouseClicked(e -> {
+                    System.out.println(">>> SETTINGS MOUSE CLICKED! (x=" + e.getX() + ", y=" + e.getY() + ") <<<");
+                    if (!e.isConsumed()) {
+                        e.consume();
+                        openSettings(new ActionEvent(settingsButton, null));
+                    }
+                });
+                
+                System.out.println("Settings button state: visible=" + settingsButton.isVisible() + 
+                                 ", disabled=" + settingsButton.isDisabled() + 
+                                 ", mouseTransparent=" + settingsButton.isMouseTransparent());
+                System.out.println("Settings button handler wired (both ActionEvent and MouseEvent)");
+            }
+            if (exitButton != null) {
+                // Clear any existing handlers first
+                exitButton.setOnAction(null);
+                exitButton.setOnMouseClicked(null);
+                
+                // Set up ActionEvent handler
+                exitButton.setOnAction(e -> {
+                    System.out.println(">>> EXIT ACTION EVENT FIRED! <<<");
+                    exitGame(e);
+                });
+                
+                // Also add mouse click handler as backup
+                exitButton.setOnMouseClicked(e -> {
+                    System.out.println(">>> EXIT MOUSE CLICKED! (x=" + e.getX() + ", y=" + e.getY() + ") <<<");
+                    if (!e.isConsumed()) {
+                        e.consume();
+                        exitGame(new ActionEvent(exitButton, null));
+                    }
+                });
+                
+                System.out.println("Exit button state: visible=" + exitButton.isVisible() + 
+                                 ", disabled=" + exitButton.isDisabled() + 
+                                 ", mouseTransparent=" + exitButton.isMouseTransparent());
+                System.out.println("Exit button handler wired (both ActionEvent and MouseEvent)");
+            }
+            
+            System.out.println("MainMenuController.initialize() completed successfully!");
+        } catch (Exception e) {
+            System.err.println("========================================");
+            System.err.println("CRITICAL ERROR in MainMenuController.initialize():");
+            System.err.println("========================================");
+            System.err.println("Exception type: " + e.getClass().getName());
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("========================================");
+            // Don't rethrow - let the UI continue even if initialization partially fails
+        }
     }
     
     /**
@@ -142,6 +301,10 @@ public class MainMenuController implements Initializable {
     private void setupHoverScale(Button button) {
         if (button == null) return;
         
+        // Ensure button is enabled and clickable before setting up animations
+        button.setDisable(false);
+        button.setMouseTransparent(false);
+        
         // Button scale animation (1.00 → 1.03, 175ms ease-out) - subtle hover scale
         ScaleTransition scale = new ScaleTransition(Duration.millis(175), button);
         scale.setFromX(1.0);
@@ -158,12 +321,14 @@ public class MainMenuController implements Initializable {
         
         button.setOnMouseEntered(e -> {
             // Subtle hover effects: scale up and lift
+            // Don't consume event - let it pass through
             scale.play();
             translate.play();
         });
         
         button.setOnMouseExited(e -> {
             // Reverse scale animation (175ms ease-out)
+            // Don't consume event - let it pass through
             ScaleTransition reverseScale = new ScaleTransition(Duration.millis(175), button);
             reverseScale.setFromX(button.getScaleX());
             reverseScale.setFromY(button.getScaleY());
@@ -188,6 +353,10 @@ public class MainMenuController implements Initializable {
     private void setupPressScale(Button button) {
         if (button == null) return;
         
+        // Ensure button is enabled and clickable
+        button.setDisable(false);
+        button.setMouseTransparent(false);
+        
         ScaleTransition pressScale = new ScaleTransition(Duration.millis(150), button);
         pressScale.setFromX(1.0);
         pressScale.setFromY(1.0);
@@ -196,10 +365,12 @@ public class MainMenuController implements Initializable {
         pressScale.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
         
         button.setOnMousePressed(e -> {
+            // Don't consume event - let ActionEvent fire
             pressScale.play();
         });
         
         button.setOnMouseReleased(e -> {
+            // Don't consume event - let ActionEvent fire
             // Bounce back to normal size (150ms ease-out)
             ScaleTransition release = new ScaleTransition(Duration.millis(150), button);
             release.setFromX(button.getScaleX());
@@ -230,52 +401,174 @@ public class MainMenuController implements Initializable {
      */
     @FXML
     private void startGame(ActionEvent event) {
+        if (event != null) {
+            event.consume(); // Consume the event to prevent double-firing
+        }
+        System.out.println("========================================");
+        System.out.println(">>> START GAME BUTTON CLICKED! <<<");
+        System.out.println("========================================");
+        System.out.println("Event source: " + (event != null ? event.getSource() : "null"));
+        System.out.println("Event target: " + (event != null ? event.getTarget() : "null"));
+        
         try {
+            System.out.println("Loading gameLayout.fxml...");
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/gameLayout.fxml")
             );
             
+            if (loader.getLocation() == null) {
+                System.err.println("ERROR: Cannot find /gameLayout.fxml");
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Cannot Load Game");
+                alert.setContentText("Game layout file not found!");
+                alert.showAndWait();
+                return;
+            }
+            
+            System.out.println("Found gameLayout.fxml, loading...");
             Parent gameRoot = loader.load();
+            System.out.println("FXML loaded successfully!");
             
             // Get the GUI controller from FXML
             GuiController gui = loader.getController();
+            if (gui == null) {
+                System.err.println("ERROR: GuiController is null!");
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Cannot Start Game");
+                alert.setContentText("Game controller could not be initialized.");
+                alert.showAndWait();
+                return;
+            }
+            System.out.println("GuiController obtained: " + gui);
+            
+            // Set the primary stage reference in GuiController FIRST (before GameController)
+            if (primaryStage != null) {
+                gui.setPrimaryStage(primaryStage);
+                System.out.println("Primary stage set in GuiController");
+            } else {
+                System.err.println("ERROR: primaryStage is null in startGame!");
+                return;
+            }
+            
             
             // Create the game controller and connect it to GUI
-            new GameController(gui);
-            
-            // Set the primary stage reference in GuiController for scene switching
-            gui.setPrimaryStage(primaryStage);
+            System.out.println("Creating GameController...");
+            try {
+                new GameController(gui);
+                System.out.println("GameController created successfully!");
+            } catch (Exception e) {
+                System.err.println("ERROR: Failed to create GameController: " + e.getMessage());
+                e.printStackTrace();
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Cannot Start Game");
+                alert.setContentText("Failed to initialize game: " + e.getMessage());
+                alert.showAndWait();
+                return;
+            }
             
             // Update Hard Drop label visibility based on current settings
-            gui.updateHardDropLabelVisibility();
+            try {
+                gui.updateHardDropLabelVisibility();
+                System.out.println("Hard drop label visibility updated");
+            } catch (Exception e) {
+                System.err.println("WARNING: Could not update hard drop label visibility: " + e.getMessage());
+                // Continue - this is not critical
+            }
             
             // Create and set the game scene
+            System.out.println("Creating game scene...");
             Scene gameScene = new Scene(gameRoot, 900, 700);
             gameScene.setFill(javafx.scene.paint.Color.web("#000000"));
+            System.out.println("Game scene created!");
             
-            if (primaryStage != null) {
-                // Set fullscreen BEFORE scene change to prevent exit
-                primaryStage.setFullScreen(true);
-                primaryStage.setFullScreenExitHint("");
-                primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+            // Ensure the game root is interactive and visible
+            gameRoot.setMouseTransparent(false);
+            gameRoot.setDisable(false);
+            gameRoot.setVisible(true);
+            gameRoot.setOpacity(1.0);
+            
+            if (primaryStage == null) {
+                System.err.println("ERROR: primaryStage is null in startGame!");
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Cannot Start Game");
+                alert.setContentText("Primary stage is not set.");
+                alert.showAndWait();
+                return;
+            }
+            
+            System.out.println("Setting scene on primary stage...");
+            
+            try {
+                // TEMPORARILY disable fullscreen to test if that's the issue
+                boolean wasFullScreen = primaryStage.isFullScreen();
+                if (wasFullScreen) {
+                    primaryStage.setFullScreen(false);
+                    System.out.println("Temporarily disabled fullscreen for scene change");
+                }
                 
+                // Set scene
                 primaryStage.setScene(gameScene);
                 primaryStage.setTitle("Tetris - Game");
                 
-                // Force fullscreen immediately after scene change
+                // Show the stage
+                primaryStage.show();
+                System.out.println("Stage shown");
+                
+                // Request focus and re-enable fullscreen after a short delay
                 javafx.application.Platform.runLater(() -> {
-                    primaryStage.setFullScreen(true);
-                    primaryStage.setFullScreenExitHint("");
-                    primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                    try {
+                        gameRoot.requestFocus();
+                        System.out.println("Game root requested focus");
+                        
+                        // Re-enable fullscreen after scene is rendered
+                        javafx.application.Platform.runLater(() -> {
+                            try {
+                                if (wasFullScreen && primaryStage != null) {
+                                    primaryStage.setFullScreen(true);
+                                    primaryStage.setFullScreenExitHint("");
+                                    primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                                    System.out.println("Fullscreen re-enabled");
+                                }
+                            } catch (Exception e) {
+                                System.err.println("WARNING: Error re-enabling fullscreen: " + e.getMessage());
+                            }
+                        });
+                    } catch (Exception e) {
+                        System.err.println("WARNING: Error requesting focus: " + e.getMessage());
+                    }
                 });
                 
-                // Request focus for keyboard input
-                gameRoot.requestFocus();
+                System.out.println("Scene set on stage successfully!");
+                System.out.println("Game should be visible now!");
+            } catch (Exception e) {
+                System.err.println("ERROR: Failed to set scene: " + e.getMessage());
+                e.printStackTrace();
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Cannot Start Game");
+                alert.setContentText("Failed to switch to game scene: " + e.getMessage());
+                alert.showAndWait();
             }
             
-        } catch (IOException e) {
-            System.err.println("Error loading game scene: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("========================================");
+            System.err.println("CRITICAL ERROR in startGame():");
+            System.err.println("========================================");
+            System.err.println("Exception type: " + e.getClass().getName());
+            System.err.println("Message: " + e.getMessage());
             e.printStackTrace();
+            System.err.println("========================================");
+            
+            // Show error dialog to user
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Cannot Start Game");
+            alert.setContentText("An error occurred while loading the game:\n" + e.getMessage());
+            alert.showAndWait();
         }
     }
     
@@ -284,9 +577,14 @@ public class MainMenuController implements Initializable {
      */
     @FXML
     private void openSettings(ActionEvent event) {
+        if (event != null) {
+            event.consume(); // Consume the event to prevent double-firing
+        }
         System.out.println("\n\n========================================");
         System.out.println(">>> SETTINGS BUTTON CLICKED! <<<");
         System.out.println("========================================\n");
+        System.out.println("Event source: " + (event != null ? event.getSource() : "null"));
+        System.out.println("Event target: " + (event != null ? event.getTarget() : "null"));
         
         if (primaryStage == null) {
             System.err.println("ERROR: primaryStage is null!");
@@ -331,23 +629,44 @@ public class MainMenuController implements Initializable {
             settingsScene.setFill(javafx.scene.paint.Color.web("#000000"));
             System.out.println("Scene created");
             
-            // Set scene on stage
-            primaryStage.setFullScreen(true);
-            primaryStage.setFullScreenExitHint("");
-            primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+            // TEMPORARILY disable fullscreen to test if that's the issue
+            boolean wasFullScreen = primaryStage.isFullScreen();
+            if (wasFullScreen) {
+                primaryStage.setFullScreen(false);
+                System.out.println("Temporarily disabled fullscreen for scene change");
+            }
             
+            // Set scene on stage FIRST
             primaryStage.setScene(settingsScene);
             primaryStage.setTitle("Tetris - Settings");
             System.out.println("Scene set on stage!");
             
+            // Ensure the settings root is visible and interactive
+            settingsRoot.setVisible(true);
+            settingsRoot.setOpacity(1.0);
+            settingsRoot.setMouseTransparent(false);
+            settingsRoot.setDisable(false);
+            
+            // Show the stage
+            primaryStage.show();
+            System.out.println("Stage shown");
+            
             // Re-enable fullscreen after scene change
             javafx.application.Platform.runLater(() -> {
-                primaryStage.setFullScreen(true);
-                primaryStage.setFullScreenExitHint("");
-                primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                settingsRoot.requestFocus();
+                System.out.println("Settings root requested focus");
+                
+                // Re-enable fullscreen after scene is rendered
+                javafx.application.Platform.runLater(() -> {
+                    if (wasFullScreen) {
+                        primaryStage.setFullScreen(true);
+                        primaryStage.setFullScreenExitHint("");
+                        primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                        System.out.println("Fullscreen re-enabled");
+                    }
+                });
             });
             
-            settingsRoot.requestFocus();
             System.out.println("Settings screen should be visible now!\n");
             
         } catch (javafx.fxml.LoadException e) {
@@ -374,6 +693,10 @@ public class MainMenuController implements Initializable {
      */
     @FXML
     private void exitGame(ActionEvent event) {
+        if (event != null) {
+            event.consume(); // Consume the event to prevent double-firing
+        }
+        System.out.println(">>> EXIT BUTTON CLICKED! <<<");
         if (primaryStage != null) {
             primaryStage.close();
         } else {

@@ -30,9 +30,6 @@ public class SettingsController implements Initializable {
     private Label volumeLabel;
     
     @FXML
-    private ToggleButton musicToggle;
-    
-    @FXML
     private ToggleButton sfxToggle;
     
     @FXML
@@ -66,69 +63,92 @@ public class SettingsController implements Initializable {
         System.out.println("SettingsController.initialize() called!");
         try {
             System.out.println("Getting AudioManager instance...");
-            audioManager = AudioManager.getInstance();
-            System.out.println("AudioManager obtained: " + audioManager);
-            
-            // Initialize volume slider with current volume
-            if (volumeSlider != null) {
-                double currentVolume = audioManager.getMasterVolume() * 100.0;  // Convert to 0-100
-                volumeSlider.setValue(currentVolume);
+            try {
+                audioManager = AudioManager.getInstance();
+                System.out.println("AudioManager obtained: " + audioManager);
+            } catch (Exception e) {
+                System.err.println("WARNING: Error getting AudioManager: " + e.getMessage());
+                e.printStackTrace();
+                // Continue - settings can work without AudioManager
             }
             
-            if (volumeLabel != null) {
-                volumeLabel.setText(String.format("%.0f%%", audioManager.getMasterVolume() * 100.0));
+            // Initialize volume slider with current volume (only if audioManager is available)
+            if (audioManager != null) {
+                if (volumeSlider != null) {
+                    double currentVolume = audioManager.getMasterVolume() * 100.0;  // Convert to 0-100
+                    volumeSlider.setValue(currentVolume);
+                }
+                
+                if (volumeLabel != null) {
+                    volumeLabel.setText(String.format("%.0f%%", audioManager.getMasterVolume() * 100.0));
+                }
+                
+                if (sfxToggle != null) {
+                    boolean sfxEnabled = audioManager.isSfxEnabled();
+                    sfxToggle.setSelected(sfxEnabled);
+                    sfxToggle.setText(sfxEnabled ? "ON" : "OFF");
+                }
+                
+                // Initialize ghost piece toggle with saved setting
+                if (ghostToggle != null) {
+                    boolean ghostEnabled = audioManager.isGhostPieceEnabled();
+                    ghostToggle.setSelected(ghostEnabled);
+                    ghostToggle.setText(ghostEnabled ? "ON" : "OFF");
+                }
+                
+                // Initialize hard drop toggle with saved setting
+                if (hardDropToggle != null) {
+                    boolean hardDropEnabled = audioManager.isHardDropEnabled();
+                    hardDropToggle.setSelected(hardDropEnabled);
+                    hardDropToggle.setText(hardDropEnabled ? "ON" : "OFF");
+                }
+                
+                // Create ToggleGroup for difficulty radio buttons
+                difficultyGroup = new ToggleGroup();
+                
+                // Initialize difficulty radio buttons
+                AudioManager.Difficulty currentDifficulty = audioManager.getDifficulty();
+                if (easyRadio != null) {
+                    easyRadio.setToggleGroup(difficultyGroup);
+                    easyRadio.setSelected(currentDifficulty == AudioManager.Difficulty.EASY);
+                }
+                if (mediumRadio != null) {
+                    mediumRadio.setToggleGroup(difficultyGroup);
+                    mediumRadio.setSelected(currentDifficulty == AudioManager.Difficulty.MEDIUM);
+                }
+                if (hardRadio != null) {
+                    hardRadio.setToggleGroup(difficultyGroup);
+                    hardRadio.setSelected(currentDifficulty == AudioManager.Difficulty.HARD);
+                }
+                
+                // Update difficulty section styling based on selection
+                updateDifficultySectionStyle();
+            } else {
+                // If audioManager is null, initialize with defaults
+                System.err.println("WARNING: AudioManager is null, using default values");
+                if (volumeSlider != null) volumeSlider.setValue(100.0);
+                if (volumeLabel != null) volumeLabel.setText("100%");
+                if (sfxToggle != null) {
+                    sfxToggle.setSelected(true);
+                    sfxToggle.setText("ON");
+                }
+                if (ghostToggle != null) {
+                    ghostToggle.setSelected(true);
+                    ghostToggle.setText("ON");
+                }
+                if (hardDropToggle != null) {
+                    hardDropToggle.setSelected(true);
+                    hardDropToggle.setText("ON");
+                }
+                difficultyGroup = new ToggleGroup();
+                if (mediumRadio != null) {
+                    mediumRadio.setToggleGroup(difficultyGroup);
+                    mediumRadio.setSelected(true);
+                }
             }
-            
-            // Initialize toggles with current state
-            if (musicToggle != null) {
-                boolean musicEnabled = audioManager.isMusicEnabled();
-                musicToggle.setSelected(musicEnabled);
-                musicToggle.setText(musicEnabled ? "ON" : "OFF");
-            }
-            
-            if (sfxToggle != null) {
-                boolean sfxEnabled = audioManager.isSfxEnabled();
-                sfxToggle.setSelected(sfxEnabled);
-                sfxToggle.setText(sfxEnabled ? "ON" : "OFF");
-            }
-            
-            // Initialize ghost piece toggle with saved setting
-            if (ghostToggle != null) {
-                boolean ghostEnabled = audioManager.isGhostPieceEnabled();
-                ghostToggle.setSelected(ghostEnabled);
-                ghostToggle.setText(ghostEnabled ? "ON" : "OFF");
-            }
-            
-            // Initialize hard drop toggle with saved setting
-            if (hardDropToggle != null) {
-                boolean hardDropEnabled = audioManager.isHardDropEnabled();
-                hardDropToggle.setSelected(hardDropEnabled);
-                hardDropToggle.setText(hardDropEnabled ? "ON" : "OFF");
-            }
-            
-            // Create ToggleGroup for difficulty radio buttons
-            difficultyGroup = new ToggleGroup();
-            
-            // Initialize difficulty radio buttons
-            AudioManager.Difficulty currentDifficulty = audioManager.getDifficulty();
-            if (easyRadio != null) {
-                easyRadio.setToggleGroup(difficultyGroup);
-                easyRadio.setSelected(currentDifficulty == AudioManager.Difficulty.EASY);
-            }
-            if (mediumRadio != null) {
-                mediumRadio.setToggleGroup(difficultyGroup);
-                mediumRadio.setSelected(currentDifficulty == AudioManager.Difficulty.MEDIUM);
-            }
-            if (hardRadio != null) {
-                hardRadio.setToggleGroup(difficultyGroup);
-                hardRadio.setSelected(currentDifficulty == AudioManager.Difficulty.HARD);
-            }
-            
-            // Update difficulty section styling based on selection
-            updateDifficultySectionStyle();
         
-            // Volume slider listener - saves immediately
-            if (volumeSlider != null && volumeLabel != null) {
+            // Master volume slider listener - saves immediately (only if audioManager available)
+            if (audioManager != null && volumeSlider != null && volumeLabel != null) {
                 volumeSlider.valueProperty().addListener(new ChangeListener<Number>() {
                     @Override
                     public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
@@ -142,19 +162,8 @@ public class SettingsController implements Initializable {
                 });
             }
             
-            // Music toggle listener - saves immediately
-            if (musicToggle != null) {
-                musicToggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                        audioManager.setMusicEnabled(newValue);
-                        musicToggle.setText(newValue ? "ON" : "OFF");
-                    }
-                });
-            }
-            
-            // SFX toggle listener - saves immediately
-            if (sfxToggle != null) {
+            // SFX toggle listener - saves immediately (only if audioManager available)
+            if (audioManager != null && sfxToggle != null) {
                 sfxToggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
                     @Override
                     public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -164,8 +173,8 @@ public class SettingsController implements Initializable {
                 });
             }
             
-            // Ghost piece toggle listener - saves immediately
-            if (ghostToggle != null) {
+            // Ghost piece toggle listener - saves immediately (only if audioManager available)
+            if (audioManager != null && ghostToggle != null) {
                 ghostToggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
                     @Override
                     public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -175,8 +184,8 @@ public class SettingsController implements Initializable {
                 });
             }
             
-            // Hard drop toggle listener - saves immediately
-            if (hardDropToggle != null) {
+            // Hard drop toggle listener - saves immediately (only if audioManager available)
+            if (audioManager != null && hardDropToggle != null) {
                 hardDropToggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
                     @Override
                     public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -186,8 +195,8 @@ public class SettingsController implements Initializable {
                 });
             }
             
-            // Difficulty radio button listeners - save immediately when changed
-            if (difficultyGroup != null) {
+            // Difficulty radio button listeners - save immediately when changed (only if audioManager available)
+            if (audioManager != null && difficultyGroup != null) {
                 difficultyGroup.selectedToggleProperty().addListener(new ChangeListener<javafx.scene.control.Toggle>() {
                     @Override
                     public void changed(ObservableValue<? extends javafx.scene.control.Toggle> observable, 
@@ -209,6 +218,40 @@ public class SettingsController implements Initializable {
                         updateDifficultySectionStyle();
                     }
                 });
+            }
+            
+            // Ensure all controls are enabled and clickable
+            if (volumeSlider != null) {
+                volumeSlider.setDisable(false);
+                volumeSlider.setMouseTransparent(false);
+            }
+            if (sfxToggle != null) {
+                sfxToggle.setDisable(false);
+                sfxToggle.setMouseTransparent(false);
+            }
+            if (ghostToggle != null) {
+                ghostToggle.setDisable(false);
+                ghostToggle.setMouseTransparent(false);
+            }
+            if (hardDropToggle != null) {
+                hardDropToggle.setDisable(false);
+                hardDropToggle.setMouseTransparent(false);
+            }
+            if (easyRadio != null) {
+                easyRadio.setDisable(false);
+                easyRadio.setMouseTransparent(false);
+            }
+            if (mediumRadio != null) {
+                mediumRadio.setDisable(false);
+                mediumRadio.setMouseTransparent(false);
+            }
+            if (hardRadio != null) {
+                hardRadio.setDisable(false);
+                hardRadio.setMouseTransparent(false);
+            }
+            if (backButton != null) {
+                backButton.setDisable(false);
+                backButton.setMouseTransparent(false);
             }
             
             System.out.println("SettingsController.initialize() completed successfully!");

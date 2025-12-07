@@ -110,6 +110,10 @@
                           hgap="1" 
                           vgap="1"
                           styleClass="playfield-grid"/>
+                <!-- Score Popup Overlay - For floating score animations -->
+                <Pane fx:id="scoreOverlay" 
+                      mouseTransparent="true"
+                      pickOnBounds="false"/>
                 <!-- Game Over Overlay - Centered relative to board only -->
                 <GameOverPanel fx:id="gameOverPanel" visible="false"/>
             </StackPane>
