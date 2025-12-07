@@ -19,6 +19,14 @@
     
     <!-- Button Container -->
     <VBox alignment="CENTER" spacing="26">
+        <!-- NEW GAME Button -->
+        <Button fx:id="startGameButton"
+                text="NEW GAME"
+                onAction="#startGame"
+                styleClass="main-menu-button start-game-button"
+                prefWidth="280"
+                prefHeight="60"/>
+        
         <!-- RESUME GAME Button (only visible when saved state exists) -->
         <Button fx:id="resumeGameButton"
                 text="RESUME GAME"
@@ -28,14 +36,6 @@
                 prefHeight="60"
                 visible="false"
                 managed="false"/>
-        
-        <!-- NEW GAME Button -->
-        <Button fx:id="startGameButton"
-                text="NEW GAME"
-                onAction="#startGame"
-                styleClass="main-menu-button start-game-button"
-                prefWidth="280"
-                prefHeight="60"/>
         
         <!-- SETTINGS Button -->
         <Button fx:id="settingsButton"
