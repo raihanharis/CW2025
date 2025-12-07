@@ -7,20 +7,104 @@ public class GameController implements InputEventListener {
     
     // High score persists during app session (static field)
     private static int highScore = 0;
+    
+    // Saved game state for resume functionality
+    private static GameState savedGameState = null;
 
+    /**
+     * Creates a new GameController, either starting fresh or resuming from saved state.
+     */
     public GameController(GuiController gui) {
         this.gui = gui;
         // Official Tetris: 10 columns × 22 rows (20 visible + 2 hidden spawn rows)
         this.board = new SimpleBoard(10, 22);
 
-        board.createNewBrick();
-
         gui.setEventListener(this);
-        gui.initGameView(board.getBoardMatrix(), board.getViewData());
+        
+        // Check if we should resume from saved state
+        if (savedGameState != null) {
+            resumeFromSavedState();
+        } else {
+            // Start fresh game
+            board.createNewBrick();
+            gui.initGameView(board.getBoardMatrix(), board.getViewData());
+        }
+        
         gui.bindScore(board.getScore().scoreProperty());
         
         // Initialize high score display
         gui.updateHighScore(highScore);
+    }
+    
+    /**
+     * Resumes the game from a saved state.
+     */
+    private void resumeFromSavedState() {
+        SimpleBoard simpleBoard = (SimpleBoard) board;
+        
+        // Restore board state
+        simpleBoard.restoreState(savedGameState);
+        
+        // Restore UI state (level, lines, score) - must be done BEFORE initGameView
+        gui.restoreGameState(savedGameState);
+        
+        // Restore difficulty speed - must be done BEFORE initGameView so timeline uses correct speed
+        AudioManager audioManager = AudioManager.getInstance();
+        audioManager.setDifficulty(AudioManager.Difficulty.valueOf(savedGameState.getDifficulty()));
+        
+        // Initialize game view with restored state
+        gui.initGameView(board.getBoardMatrix(), board.getViewData());
+        
+        // Update game speed after view is initialized (timeline is created in initGameView)
+        gui.updateDifficultySpeed();
+        
+        System.out.println("Game resumed from saved state!");
+    }
+    
+    /**
+     * Saves the current game state for later resumption.
+     * Called when returning to main menu.
+     */
+    public void saveGameState() {
+        if (board instanceof SimpleBoard) {
+            SimpleBoard simpleBoard = (SimpleBoard) board;
+            
+            // Get current UI state
+            int totalLinesCleared = gui.getTotalLinesCleared();
+            int currentLevel = gui.getCurrentLevel();
+            
+            // Get settings
+            AudioManager audioManager = AudioManager.getInstance();
+            boolean ghostPieceEnabled = audioManager.isGhostPieceEnabled();
+            boolean hardDropEnabled = audioManager.isHardDropEnabled();
+            String difficulty = audioManager.getDifficulty().name();
+            
+            // Save state
+            savedGameState = simpleBoard.saveState(
+                totalLinesCleared,
+                currentLevel,
+                ghostPieceEnabled,
+                hardDropEnabled,
+                difficulty
+            );
+            
+            System.out.println("Game state saved!");
+        }
+    }
+    
+    /**
+     * Clears the saved game state.
+     * Called when starting a new game or restarting.
+     */
+    public static void clearSavedState() {
+        savedGameState = null;
+    }
+    
+    /**
+     * Checks if there is a saved game state.
+     */
+    public static boolean hasSavedState() {
+        return savedGameState != null;
     }
     
     /**
@@ -127,6 +211,8 @@ public class GameController implements InputEventListener {
 
     @Override
     public void createNewGame() {
+        // Clear saved state when restarting
+        clearSavedState();
         board.newGame();
         gui.refreshView(board.getViewData());
     }

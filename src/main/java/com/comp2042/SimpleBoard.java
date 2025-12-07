@@ -5,6 +5,7 @@ import com.comp2042.logic.bricks.BrickGenerator;
 import com.comp2042.logic.bricks.RandomBrickGenerator;
 
 import java.awt.*;
+import java.util.Deque;
 
 public class SimpleBoard implements Board {
 
@@ -185,5 +186,84 @@ public class SimpleBoard implements Board {
         currentGameMatrix = new int[height][width];
         score.reset();
         createNewBrick();
+    }
+    
+    /**
+     * Saves the current game state to a GameState object.
+     * This includes board, active brick, next bricks, score, and generator queue.
+     */
+    public GameState saveState(int totalLinesCleared, int currentLevel, 
+                               boolean ghostPieceEnabled, boolean hardDropEnabled, String difficulty) {
+        // Get current brick type
+        Brick currentBrick = brickRotator.brick; // Access via reflection or add getter
+        String activeBrickType = getBrickTypeName(currentBrick);
+        int rotationIndex = brickRotator.currentRotationIndex; // Access via reflection or add getter
+        
+        // Get next brick types
+        Brick next1 = brickGenerator.getNextBrick();
+        Brick next2 = brickGenerator.getNextBrick2();
+        String next1Type = getBrickTypeName(next1);
+        String next2Type = getBrickTypeName(next2);
+        
+        // Get brick generator queue
+        Deque<String> queue = ((RandomBrickGenerator) brickGenerator).getQueueAsStrings();
+        
+        return new GameState(
+            currentGameMatrix,
+            brickRotator.getCurrentShape(),
+            currentOffset.x,
+            currentOffset.y,
+            rotationIndex,
+            activeBrickType,
+            next1Type,
+            next2Type,
+            queue,
+            score.scoreProperty().get(),
+            totalLinesCleared,
+            currentLevel,
+            ghostPieceEnabled,
+            hardDropEnabled,
+            difficulty
+        );
+    }
+    
+    /**
+     * Restores the game state from a GameState object.
+     */
+    public void restoreState(GameState state) {
+        // Restore board matrix
+        currentGameMatrix = state.getBoardMatrix();
+        
+        // Restore score - reset and add the saved score
+        score.reset();
+        score.add(state.getScore());
+        
+        // Restore brick generator queue
+        ((RandomBrickGenerator) brickGenerator).restoreQueue(state.getBrickGeneratorQueue());
+        
+        // Restore active brick
+        Brick activeBrick = createBrickFromType(state.getActiveBrickType());
+        brickRotator.setBrick(activeBrick);
+        brickRotator.setCurrentShape(state.getActiveBrickRotationIndex());
+        
+        // Restore position
+        currentOffset = new Point(state.getActiveBrickX(), state.getActiveBrickY());
+    }
+    
+    /**
+     * Helper method to get brick type name from a Brick instance.
+     */
+    private String getBrickTypeName(Brick brick) {
+        if (brick == null) return "IBrick";
+        String className = brick.getClass().getSimpleName();
+        return className;
+    }
+    
+    /**
+     * Helper method to create a Brick instance from a type name.
+     * Uses the brick generator's factory method.
+     */
+    private Brick createBrickFromType(String typeName) {
+        return ((RandomBrickGenerator) brickGenerator).createBrickFromType(typeName);
     }
 }

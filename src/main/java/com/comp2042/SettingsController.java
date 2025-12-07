@@ -55,7 +55,7 @@ public class SettingsController implements Initializable {
     @FXML
     private VBox difficultySection;
     
-    private Stage primaryStage;
+    // Removed primaryStage field - we get Stage from scene.getWindow()
     private AudioManager audioManager;
     
     @Override
@@ -216,6 +216,9 @@ public class SettingsController implements Initializable {
                         
                         // Update styling
                         updateDifficultySectionStyle();
+                        
+                        // Immediately update game speed if game is running
+                        GuiController.updateDifficultySpeedIfActive();
                     }
                 });
             }
@@ -286,9 +289,7 @@ public class SettingsController implements Initializable {
     /**
      * Sets the primary stage for scene switching.
      */
-    public void setPrimaryStage(Stage stage) {
-        this.primaryStage = stage;
-    }
+    // Removed setPrimaryStage - we now get Stage from scene.getWindow()
     
     /**
      * Handles the Back button click - returns to main menu.
@@ -304,32 +305,31 @@ public class SettingsController implements Initializable {
             
             javafx.scene.Parent mainMenuRoot = loader.load();
             
-            // Get the MainMenuController and set the primary stage
-            MainMenuController mainMenuController = loader.getController();
-            mainMenuController.setPrimaryStage(primaryStage);
+            // Get Stage from current scene - do NOT use stored primaryStage
+            Stage stage = (Stage) backButton.getScene().getWindow();
+            if (stage == null) {
+                System.err.println("ERROR: Cannot get stage from scene!");
+                return;
+            }
             
-            // Create and set the main menu scene
+            // Create main menu scene
             javafx.scene.Scene mainMenuScene = new javafx.scene.Scene(mainMenuRoot, 900, 700);
             mainMenuScene.setFill(javafx.scene.paint.Color.web("#000000"));
             
-            if (primaryStage != null) {
-                // Set fullscreen BEFORE scene change to prevent exit
-                primaryStage.setFullScreen(true);
-                primaryStage.setFullScreenExitHint("");
-                primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
-                
-                primaryStage.setScene(mainMenuScene);
-                primaryStage.setTitle("Tetris - Main Menu");
-                
-                // Force fullscreen immediately after scene change
-                javafx.application.Platform.runLater(() -> {
-                    primaryStage.setFullScreen(true);
-                    primaryStage.setFullScreenExitHint("");
-                    primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
-                });
-                
-                mainMenuRoot.requestFocus();
-            }
+            // Switch scene
+            stage.setScene(mainMenuScene);
+            stage.setTitle("Tetris - Main Menu");
+            
+            // Request focus for keyboard input
+            javafx.application.Platform.runLater(() -> {
+                try {
+                    if (mainMenuRoot != null) {
+                        mainMenuRoot.requestFocus();
+                    }
+                } catch (Exception e) {
+                    // Silently ignore focus errors
+                }
+            });
             
         } catch (Exception e) {
             System.err.println("Error loading main menu: " + e.getMessage());

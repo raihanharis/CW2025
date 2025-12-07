@@ -10,7 +10,7 @@ public class RandomBrickGenerator implements BrickGenerator {
 
     private final List<Brick> brickList;
 
-    private final Deque<Brick> nextBricks = new ArrayDeque<>();
+    Deque<Brick> nextBricks = new ArrayDeque<>(); // Package-private for state saving
 
     public RandomBrickGenerator() {
         brickList = new ArrayList<>();
@@ -56,5 +56,44 @@ public class RandomBrickGenerator implements BrickGenerator {
         }
         // Fallback: generate a random brick
         return brickList.get(ThreadLocalRandom.current().nextInt(brickList.size()));
+    }
+    
+    /**
+     * Gets the queue as a deque of type name strings for state saving.
+     */
+    public Deque<String> getQueueAsStrings() {
+        Deque<String> queue = new ArrayDeque<>();
+        for (Brick brick : nextBricks) {
+            queue.add(brick.getClass().getSimpleName());
+        }
+        return queue;
+    }
+    
+    /**
+     * Restores the queue from a deque of type name strings.
+     */
+    public void restoreQueue(Deque<String> typeNames) {
+        nextBricks.clear();
+        for (String typeName : typeNames) {
+            Brick brick = createBrickFromType(typeName);
+            nextBricks.add(brick);
+        }
+    }
+    
+    /**
+     * Helper method to create a Brick instance from a type name.
+     * Public so SimpleBoard can use it.
+     */
+    public Brick createBrickFromType(String typeName) {
+        switch (typeName) {
+            case "IBrick": return new IBrick();
+            case "JBrick": return new JBrick();
+            case "LBrick": return new LBrick();
+            case "OBrick": return new OBrick();
+            case "SBrick": return new SBrick();
+            case "TBrick": return new TBrick();
+            case "ZBrick": return new ZBrick();
+            default: return new IBrick();
+        }
     }
 }

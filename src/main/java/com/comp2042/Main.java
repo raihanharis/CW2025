@@ -21,9 +21,8 @@ public class Main extends Application {
 
         Parent root = loader.load();
 
-        // Get the MainMenuController and set the primary stage
+        // Get the MainMenuController (no need to set primaryStage - controllers get it from scene)
         MainMenuController mainMenuController = loader.getController();
-        mainMenuController.setPrimaryStage(primaryStage);
 
         // Create and show the main menu scene
         primaryStage.setTitle("Tetris");
@@ -38,29 +37,8 @@ public class Main extends Application {
         root.setDisable(false);
         root.setPickOnBounds(true);
         
-        // Request focus on the root to ensure events work
-        javafx.application.Platform.runLater(() -> {
-            root.requestFocus();
-            System.out.println("Main menu root requested focus");
-        });
-        
-        // Show stage first
+        // Show stage
         primaryStage.show();
-        
-        // TEMPORARILY DISABLE FULLSCREEN TO TEST IF IT'S BLOCKING BUTTONS
-        // Enable fullscreen mode after stage is shown
-        javafx.application.Platform.runLater(() -> {
-            try {
-                // TEMPORARILY COMMENTED OUT TO TEST
-                // primaryStage.setFullScreen(true);
-                // primaryStage.setFullScreenExitHint("");  // Hide the exit hint
-                // primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);  // Disable ESC to exit fullscreen
-                System.out.println("Fullscreen temporarily disabled for testing");
-            } catch (Exception e) {
-                System.err.println("WARNING: Could not enable fullscreen: " + e.getMessage());
-                // Continue without fullscreen
-            }
-        });
         
         // Request focus for keyboard input
         javafx.application.Platform.runLater(() -> {

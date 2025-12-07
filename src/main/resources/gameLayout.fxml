@@ -109,6 +109,8 @@
                 <GridPane fx:id="gamePanel" 
                           hgap="1" 
                           vgap="1"
+                          prefWidth="220"
+                          prefHeight="484"
                           styleClass="playfield-grid"/>
                 <!-- Score Popup Overlay - For floating score animations -->
                 <Pane fx:id="scoreOverlay" 
@@ -137,6 +139,8 @@
                 <GridPane fx:id="brickPanel" 
                           hgap="1" 
                           vgap="1"
+                          prefWidth="80"
+                          prefHeight="80"
                           alignment="CENTER"/>
             </VBox>
             
@@ -149,7 +153,9 @@
             <VBox fx:id="nextPreviewFrame2"
                   alignment="CENTER"
                   styleClass="next-box">
-                <GridPane fx:id="brickPanel2" 
+                <GridPane fx:id="brickPanel2"
+                          prefWidth="80"
+                          prefHeight="80" 
                           hgap="1" 
                           vgap="1"
                           alignment="CENTER"/>

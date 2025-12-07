@@ -214,6 +214,7 @@
     -fx-letter-spacing: 4px;
     -fx-padding: 0 0 20 0;
     -fx-alignment: center;                     /* Horizontally centered */
+    -fx-text-alignment: center;
 }
 
 /* Main Menu Buttons Base Style - Subtle Arcade Theme */

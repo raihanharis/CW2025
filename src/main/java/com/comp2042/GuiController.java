@@ -113,10 +113,16 @@ public class GuiController implements Initializable {
     private int totalLinesCleared = 0;
     private int currentLevel = 1;
     private static final int LINES_PER_LEVEL = 10;
+    
+    // Static reference to current GuiController instance (for difficulty updates)
+    private static GuiController currentInstance = null;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         FontLoader.loadDigitalFont();
+        
+        // Register this instance as the current GuiController
+        currentInstance = this;
         
         // Set up key handling on root pane
         rootPane.setFocusTraversable(true);
@@ -137,6 +143,8 @@ public class GuiController implements Initializable {
         
         // Initialize button animations
         initializeButtonAnimations();
+        
+        // Note: Removed focus traversal disabling - buttons can have focus normally
         
         // Update Hard Drop label visibility based on settings
         updateHardDropLabelVisibility();
@@ -498,7 +506,6 @@ public class GuiController implements Initializable {
         // Request focus for keyboard input
         if (rootPane != null) {
             rootPane.requestFocus();
-            System.out.println("initGameView: Focus requested on rootPane");
         }
 
         // Start game loop
@@ -923,6 +930,16 @@ public class GuiController implements Initializable {
     }
     
     /**
+     * Static method to update difficulty speed on the current GuiController instance.
+     * Called from SettingsController when difficulty changes.
+     */
+    public static void updateDifficultySpeedIfActive() {
+        if (currentInstance != null) {
+            currentInstance.updateDifficultySpeed();
+        }
+    }
+    
+    /**
      * Resets game statistics for a new game.
      * High score is NOT reset - it persists during the app session.
      */
@@ -936,6 +953,41 @@ public class GuiController implements Initializable {
             levelLabel.setText("1");
         }
         // High score is NOT reset here - it persists
+    }
+    
+    /**
+     * Gets the total lines cleared (for state saving).
+     */
+    public int getTotalLinesCleared() {
+        return totalLinesCleared;
+    }
+    
+    /**
+     * Gets the current level (for state saving).
+     */
+    public int getCurrentLevel() {
+        return currentLevel;
+    }
+    
+    /**
+     * Restores the game state from a saved GameState.
+     * Updates UI labels and internal state.
+     */
+    public void restoreGameState(GameState state) {
+        // Restore internal state
+        totalLinesCleared = state.getTotalLinesCleared();
+        currentLevel = state.getCurrentLevel();
+        
+        // Update UI labels
+        if (linesLabel != null) {
+            linesLabel.setText(String.valueOf(totalLinesCleared));
+        }
+        if (levelLabel != null) {
+            levelLabel.setText(String.valueOf(currentLevel));
+        }
+        
+        // Update game speed based on restored level
+        updateGameSpeed();
     }
     
     /**
@@ -1166,20 +1218,14 @@ public class GuiController implements Initializable {
             pauseOverlay.setOpacity(0.0);
         }
         
+        // Save game state before leaving
+        if (eventListener instanceof GameController) {
+            ((GameController) eventListener).saveGameState();
+        }
+        
         // Restore music volume if it was reduced during pause
         // Return to main menu
         returnToMainMenu();
-        rootPane.requestFocus();
-    }
-    
-    private Stage primaryStage;
-    
-    /**
-     * Sets the primary stage for scene switching.
-     * Called from MainMenuController when starting a game.
-     */
-    public void setPrimaryStage(Stage stage) {
-        this.primaryStage = stage;
     }
     
     /**
@@ -1200,35 +1246,39 @@ public class GuiController implements Initializable {
             
             javafx.scene.Parent mainMenuRoot = loader.load();
             
-            // Get the MainMenuController and set the primary stage
-            MainMenuController mainMenuController = loader.getController();
-            if (primaryStage != null) {
-                mainMenuController.setPrimaryStage(primaryStage);
+            // Get Stage from current scene - do NOT use stored primaryStage
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            if (stage == null) {
+                System.err.println("ERROR: Cannot get stage from scene!");
+                return;
             }
             
-            // Create and set the main menu scene
+            // Create main menu scene
             javafx.scene.Scene mainMenuScene = new javafx.scene.Scene(mainMenuRoot, 900, 700);
             mainMenuScene.setFill(javafx.scene.paint.Color.web("#000000"));
             
-            if (primaryStage != null) {
-                // Set fullscreen BEFORE scene change to prevent exit
-                primaryStage.setFullScreen(true);
-                primaryStage.setFullScreenExitHint("");
-                primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
-                
-                primaryStage.setScene(mainMenuScene);
-                primaryStage.setTitle("Tetris");
-                
-                // Force fullscreen immediately after scene change
+            // Switch scene
+            stage.setScene(mainMenuScene);
+            stage.setTitle("Tetris");
+            
+            // Update resume button visibility in main menu
+            MainMenuController mainMenuController = loader.getController();
+            if (mainMenuController != null) {
                 javafx.application.Platform.runLater(() -> {
-                    primaryStage.setFullScreen(true);
-                    primaryStage.setFullScreenExitHint("");
-                    primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+                    mainMenuController.updateResumeButtonVisibility();
                 });
-                
-                // Request focus for keyboard input
-                mainMenuRoot.requestFocus();
             }
+            
+            // Request focus for keyboard input
+            javafx.application.Platform.runLater(() -> {
+                try {
+                    if (mainMenuRoot != null) {
+                        mainMenuRoot.requestFocus();
+                    }
+                } catch (Exception e) {
+                    // Silently ignore focus errors
+                }
+            });
             
         } catch (java.io.IOException e) {
             System.err.println("Error loading main menu scene: " + e.getMessage());

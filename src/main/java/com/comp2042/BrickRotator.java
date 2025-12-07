@@ -13,10 +13,10 @@ import com.comp2042.logic.bricks.Brick;
 public class BrickRotator {
 
     /** The current brick being rotated. */
-    private Brick brick;
+    Brick brick; // Package-private for state saving
 
     /** The index representing the current rotation state of the brick. */
-    private int currentRotationIndex = 0;
+    int currentRotationIndex = 0; // Package-private for state saving
 
     /**
      * Returns the next rotation state of the brick without changing the current one.

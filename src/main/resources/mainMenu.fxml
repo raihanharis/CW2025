@@ -19,9 +19,19 @@
     
     <!-- Button Container -->
     <VBox alignment="CENTER" spacing="26">
-        <!-- START GAME Button -->
+        <!-- RESUME GAME Button (only visible when saved state exists) -->
+        <Button fx:id="resumeGameButton"
+                text="RESUME GAME"
+                onAction="#resumeGame"
+                styleClass="main-menu-button resume-game-button"
+                prefWidth="280"
+                prefHeight="60"
+                visible="false"
+                managed="false"/>
+        
+        <!-- NEW GAME Button -->
         <Button fx:id="startGameButton"
-                text="START GAME"
+                text="NEW GAME"
                 onAction="#startGame"
                 styleClass="main-menu-button start-game-button"
                 prefWidth="280"
