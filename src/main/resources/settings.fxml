@@ -71,6 +71,22 @@
                           styleClass="settings-toggle"/>
         </VBox>
         
+        <!-- Difficulty Section -->
+        <VBox fx:id="difficultySection" alignment="CENTER" spacing="10" styleClass="settings-section">
+            <Label text="DIFFICULTY" styleClass="settings-label"/>
+            <HBox alignment="CENTER" spacing="15">
+                <RadioButton fx:id="easyRadio"
+                            text="EASY"
+                            styleClass="settings-radio"/>
+                <RadioButton fx:id="mediumRadio"
+                            text="MEDIUM"
+                            styleClass="settings-radio"/>
+                <RadioButton fx:id="hardRadio"
+                            text="HARD"
+                            styleClass="settings-radio"/>
+            </HBox>
+        </VBox>
+        
         <!-- Spacer before Back Button for breathing room -->
         <Region prefHeight="18"/>
         

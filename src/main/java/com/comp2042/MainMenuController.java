@@ -284,43 +284,88 @@ public class MainMenuController implements Initializable {
      */
     @FXML
     private void openSettings(ActionEvent event) {
+        System.out.println("\n\n========================================");
+        System.out.println(">>> SETTINGS BUTTON CLICKED! <<<");
+        System.out.println("========================================\n");
+        
+        if (primaryStage == null) {
+            System.err.println("ERROR: primaryStage is null!");
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Cannot Open Settings");
+            alert.setContentText("Primary stage is not set. Please restart the application.");
+            alert.showAndWait();
+            return;
+        }
+        
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/settings.fxml")
-            );
+            // Load FXML
+            java.net.URL settingsUrl = getClass().getResource("/settings.fxml");
+            if (settingsUrl == null) {
+                System.err.println("ERROR: Cannot find /settings.fxml");
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Cannot Load Settings");
+                alert.setContentText("Settings FXML file not found!");
+                alert.showAndWait();
+                return;
+            }
+            System.out.println("Found settings.fxml");
             
+            FXMLLoader loader = new FXMLLoader(settingsUrl);
+            System.out.println("Loading FXML...");
             Parent settingsRoot = loader.load();
+            System.out.println("FXML loaded!");
             
-            // Get the SettingsController and set the primary stage
-            SettingsController settingsController = loader.getController();
-            settingsController.setPrimaryStage(primaryStage);
+            // Get controller
+            SettingsController controller = loader.getController();
+            if (controller != null) {
+                controller.setPrimaryStage(primaryStage);
+                System.out.println("Controller initialized");
+            } else {
+                System.err.println("WARNING: Controller is null");
+            }
             
-            // Create and set the settings scene
+            // Create scene
             Scene settingsScene = new Scene(settingsRoot, 900, 700);
             settingsScene.setFill(javafx.scene.paint.Color.web("#000000"));
+            System.out.println("Scene created");
             
-            if (primaryStage != null) {
-                // Set fullscreen BEFORE scene change to prevent exit
+            // Set scene on stage
+            primaryStage.setFullScreen(true);
+            primaryStage.setFullScreenExitHint("");
+            primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+            
+            primaryStage.setScene(settingsScene);
+            primaryStage.setTitle("Tetris - Settings");
+            System.out.println("Scene set on stage!");
+            
+            // Re-enable fullscreen after scene change
+            javafx.application.Platform.runLater(() -> {
                 primaryStage.setFullScreen(true);
                 primaryStage.setFullScreenExitHint("");
                 primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
-                
-                primaryStage.setScene(settingsScene);
-                primaryStage.setTitle("Tetris - Settings");
-                
-                // Force fullscreen immediately after scene change
-                javafx.application.Platform.runLater(() -> {
-                    primaryStage.setFullScreen(true);
-                    primaryStage.setFullScreenExitHint("");
-                    primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
-                });
-                
-                settingsRoot.requestFocus();
-            }
+            });
             
-        } catch (IOException e) {
-            System.err.println("Error loading settings scene: " + e.getMessage());
+            settingsRoot.requestFocus();
+            System.out.println("Settings screen should be visible now!\n");
+            
+        } catch (javafx.fxml.LoadException e) {
+            System.err.println("FXML Load Exception:");
             e.printStackTrace();
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("FXML Error");
+            alert.setHeaderText("Cannot Load Settings Screen");
+            alert.setContentText("Error loading settings.fxml:\n" + e.getMessage());
+            alert.showAndWait();
+        } catch (Exception e) {
+            System.err.println("Unexpected error:");
+            e.printStackTrace();
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Cannot Open Settings");
+            alert.setContentText("An error occurred:\n" + e.getMessage());
+            alert.showAndWait();
         }
     }
     

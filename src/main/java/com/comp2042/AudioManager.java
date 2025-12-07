@@ -20,6 +20,25 @@ public class AudioManager {
     private boolean ghostPieceEnabled = true;  // Default ON
     private boolean hardDropEnabled = true;  // Default ON
     
+    // Difficulty levels
+    public enum Difficulty {
+        EASY(700),    // 700ms per step
+        MEDIUM(400),  // 400ms per step (default)
+        HARD(200);    // 200ms per step
+        
+        private final int dropSpeedMs;
+        
+        Difficulty(int dropSpeedMs) {
+            this.dropSpeedMs = dropSpeedMs;
+        }
+        
+        public int getDropSpeedMs() {
+            return dropSpeedMs;
+        }
+    }
+    
+    private Difficulty difficulty = Difficulty.MEDIUM;  // Default MEDIUM
+    
     private Preferences prefs;
     
     private AudioManager() {
@@ -43,24 +62,41 @@ public class AudioManager {
         sfxEnabled = prefs.getBoolean("sfxEnabled", true);
         ghostPieceEnabled = prefs.getBoolean("ghostPieceEnabled", true);  // Default ON
         hardDropEnabled = prefs.getBoolean("hardDropEnabled", true);  // Default ON
+        
+        // Load difficulty (default MEDIUM)
+        String difficultyStr = prefs.get("difficulty", "MEDIUM");
+        try {
+            difficulty = Difficulty.valueOf(difficultyStr);
+        } catch (IllegalArgumentException e) {
+            difficulty = Difficulty.MEDIUM;  // Fallback to MEDIUM
+        }
     }
     
     /**
      * Saves settings to preferences.
      */
-    private void saveSettings() {
+    private void saveSettingsInternal() {
         prefs.putDouble("masterVolume", masterVolume);
         prefs.putBoolean("musicEnabled", musicEnabled);
         prefs.putBoolean("sfxEnabled", sfxEnabled);
         prefs.putBoolean("ghostPieceEnabled", ghostPieceEnabled);
         prefs.putBoolean("hardDropEnabled", hardDropEnabled);
+        prefs.put("difficulty", difficulty.name());
+    }
+    
+    /**
+     * Public method to save settings (called from SettingsController).
+     */
+    public void saveSettings() {
+        saveSettingsInternal();
     }
     
     /**
      * Sets the master volume (0.0 to 1.0).
      * Updates background music volume immediately.
+     * @param save if true, saves to preferences; if false, only updates in-memory value
      */
-    public void setMasterVolume(double volume) {
+    public void setMasterVolume(double volume, boolean save) {
         if (volume < 0.0) volume = 0.0;
         if (volume > 1.0) volume = 1.0;
         
@@ -71,7 +107,17 @@ public class AudioManager {
             backgroundMusic.setVolume(volume);
         }
         
-        saveSettings();
+        if (save) {
+            saveSettingsInternal();
+        }
+    }
+    
+    /**
+     * Sets the master volume (0.0 to 1.0) and saves immediately.
+     * Updates background music volume immediately.
+     */
+    public void setMasterVolume(double volume) {
+        setMasterVolume(volume, true);
     }
     
     /**
@@ -84,8 +130,9 @@ public class AudioManager {
     /**
      * Sets whether music is enabled.
      * If disabled, pauses music immediately.
+     * @param save if true, saves to preferences; if false, only updates in-memory value
      */
-    public void setMusicEnabled(boolean enabled) {
+    public void setMusicEnabled(boolean enabled, boolean save) {
         this.musicEnabled = enabled;
         
         if (backgroundMusic != null) {
@@ -96,7 +143,17 @@ public class AudioManager {
             }
         }
         
-        saveSettings();
+        if (save) {
+            saveSettingsInternal();
+        }
+    }
+    
+    /**
+     * Sets whether music is enabled and saves immediately.
+     * If disabled, pauses music immediately.
+     */
+    public void setMusicEnabled(boolean enabled) {
+        setMusicEnabled(enabled, true);
     }
     
     /**
@@ -108,10 +165,20 @@ public class AudioManager {
     
     /**
      * Sets whether SFX are enabled.
+     * @param save if true, saves to preferences; if false, only updates in-memory value
+     */
+    public void setSfxEnabled(boolean enabled, boolean save) {
+        this.sfxEnabled = enabled;
+        if (save) {
+            saveSettingsInternal();
+        }
+    }
+    
+    /**
+     * Sets whether SFX are enabled and saves immediately.
      */
     public void setSfxEnabled(boolean enabled) {
-        this.sfxEnabled = enabled;
-        saveSettings();
+        setSfxEnabled(enabled, true);
     }
     
     /**
@@ -123,10 +190,20 @@ public class AudioManager {
     
     /**
      * Sets whether the ghost piece is enabled.
+     * @param save if true, saves to preferences; if false, only updates in-memory value
+     */
+    public void setGhostPieceEnabled(boolean enabled, boolean save) {
+        this.ghostPieceEnabled = enabled;
+        if (save) {
+            saveSettingsInternal();
+        }
+    }
+    
+    /**
+     * Sets whether the ghost piece is enabled and saves immediately.
      */
     public void setGhostPieceEnabled(boolean enabled) {
-        this.ghostPieceEnabled = enabled;
-        saveSettings();
+        setGhostPieceEnabled(enabled, true);
     }
     
     /**
@@ -138,10 +215,20 @@ public class AudioManager {
     
     /**
      * Sets whether hard drop is enabled.
+     * @param save if true, saves to preferences; if false, only updates in-memory value
+     */
+    public void setHardDropEnabled(boolean enabled, boolean save) {
+        this.hardDropEnabled = enabled;
+        if (save) {
+            saveSettingsInternal();
+        }
+    }
+    
+    /**
+     * Sets whether hard drop is enabled and saves immediately.
      */
     public void setHardDropEnabled(boolean enabled) {
-        this.hardDropEnabled = enabled;
-        saveSettings();
+        setHardDropEnabled(enabled, true);
     }
     
     /**
@@ -149,6 +236,41 @@ public class AudioManager {
      */
     public boolean isHardDropEnabled() {
         return hardDropEnabled;
+    }
+    
+    /**
+     * Sets the difficulty level.
+     * @param save if true, saves to preferences; if false, only updates in-memory value
+     */
+    public void setDifficulty(Difficulty newDifficulty, boolean save) {
+        if (newDifficulty == null) {
+            newDifficulty = Difficulty.MEDIUM;
+        }
+        this.difficulty = newDifficulty;
+        if (save) {
+            saveSettingsInternal();
+        }
+    }
+    
+    /**
+     * Sets the difficulty level and saves immediately.
+     */
+    public void setDifficulty(Difficulty newDifficulty) {
+        setDifficulty(newDifficulty, true);
+    }
+    
+    /**
+     * Gets the current difficulty level.
+     */
+    public Difficulty getDifficulty() {
+        return difficulty;
+    }
+    
+    /**
+     * Gets the drop speed in milliseconds for the current difficulty.
+     */
+    public int getDropSpeedMs() {
+        return difficulty.getDropSpeedMs();
     }
     
     /**

@@ -421,6 +421,38 @@
     -fx-pref-height: 12px;
 }
 
+/* Settings Radio Buttons */
+.settings-radio {
+    -fx-font-family: "Press Start 2P", "VT323", "ArcadeClassic", "Let's go Digital", 'Courier New', monospace;
+    -fx-font-size: 16px;
+    -fx-text-fill: #66e0ff;
+    -fx-letter-spacing: 1px;
+    -fx-padding: 8 12 8 12;
+}
+
+.settings-radio .radio {
+    -fx-background-color: transparent;
+    -fx-border-color: #66e0ff;
+    -fx-border-width: 2px;
+    -fx-border-radius: 50%;
+    -fx-background-radius: 50%;
+    -fx-padding: 4px;
+}
+
+.settings-radio:selected .radio {
+    -fx-background-color: #66e0ff;
+    -fx-border-color: #72ffff;
+    -fx-effect: dropshadow(gaussian, rgba(102, 224, 255, 0.8), 8, 0.5, 0, 0);
+}
+
+.settings-radio:hover {
+    -fx-text-fill: #72ffff;
+}
+
+.settings-radio:hover .radio {
+    -fx-border-color: #72ffff;
+}
+
 /* ============================================
    NEXT PREVIEW FRAME
    ============================================ */

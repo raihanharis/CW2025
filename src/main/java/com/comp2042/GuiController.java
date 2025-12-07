@@ -845,12 +845,17 @@ public class GuiController implements Initializable {
     }
     
     /**
-     * Updates the game speed based on current level.
+     * Updates the game speed based on current level and difficulty.
      */
     private void updateGameSpeed() {
         if (timeline != null) {
-            // Base speed 400ms, decrease by 25ms per level, minimum 100ms
-            int speed = Math.max(100, 400 - (currentLevel - 1) * 25);
+            // Get base speed from difficulty setting
+            AudioManager audioManager = AudioManager.getInstance();
+            int baseSpeed = audioManager.getDropSpeedMs();
+            
+            // Adjust speed based on level (decrease by 25ms per level, minimum 50ms)
+            int speed = Math.max(50, baseSpeed - (currentLevel - 1) * 25);
+            
             timeline.stop();
             timeline.getKeyFrames().clear();
             timeline.getKeyFrames().add(new KeyFrame(
@@ -861,6 +866,14 @@ public class GuiController implements Initializable {
                 timeline.play();
             }
         }
+    }
+    
+    /**
+     * Updates the timeline speed based on current difficulty setting.
+     * Called when difficulty changes in settings.
+     */
+    public void updateDifficultySpeed() {
+        updateGameSpeed();
     }
     
     /**
@@ -926,21 +939,10 @@ public class GuiController implements Initializable {
         updatePauseButtonText();
         resetStats();
         
-        // Reset game speed to default
-        if (timeline != null) {
-            timeline.stop();
-            timeline.getKeyFrames().clear();
-            timeline.getKeyFrames().add(new KeyFrame(
-                    Duration.millis(400),
-                    e -> handleDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
-            ));
-        }
+        // Reset game speed based on current difficulty
+        updateGameSpeed();
         
         eventListener.createNewGame();
-        
-        if (timeline != null && !isPause.get()) {
-            timeline.play();
-        }
         
         rootPane.requestFocus();
     }
