@@ -41,6 +41,26 @@ import javafx.scene.Scene;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the game UI, managing rendering, input handling, and visual feedback.
+ * 
+ * <p>This class handles all aspects of the game's user interface, including:
+ * <ul>
+ *   <li>Rendering the game board, active brick, and ghost piece</li>
+ *   <li>Displaying score, level, lines cleared, and high score</li>
+ *   <li>Managing pause/unpause functionality</li>
+ *   <li>Showing score popup animations when lines are cleared</li>
+ *   <li>Handling keyboard input and forwarding events to GameController</li>
+ *   <li>Managing game state saving and restoration for resume functionality</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>The UI follows official Tetris dimensions: 10 columns × 20 visible rows
+ * (plus 2 hidden spawn rows at the top).</p>
+ * 
+ * @author Tetris Game Team
+ * @version 1.0
+ */
 public class GuiController implements Initializable {
 
     // Board dimensions (official Tetris)
@@ -161,7 +181,7 @@ public class GuiController implements Initializable {
      */
     public void updateHardDropLabelVisibility() {
         if (hardDropLabel != null) {
-            boolean hardDropEnabled = AudioManager.getInstance().isHardDropEnabled();
+            boolean hardDropEnabled = SettingsManager.getInstance().isHardDropEnabled();
             hardDropLabel.setVisible(hardDropEnabled);
             hardDropLabel.setManaged(hardDropEnabled);  // Remove from layout when hidden
         }
@@ -367,7 +387,7 @@ public class GuiController implements Initializable {
             case DOWN, S -> handleDown(new MoveEvent(EventType.DOWN, EventSource.USER));
             case SPACE -> {
                 // Only allow hard drop if enabled in settings
-                if (AudioManager.getInstance().isHardDropEnabled()) {
+                if (SettingsManager.getInstance().isHardDropEnabled()) {
                     handleHardDrop();
                 }
             }
@@ -536,7 +556,7 @@ public class GuiController implements Initializable {
         drawBoard(viewData);
         
         // Draw ghost piece only if enabled in settings
-        if (AudioManager.getInstance().isGhostPieceEnabled()) {
+        if (SettingsManager.getInstance().isGhostPieceEnabled()) {
             drawGhostBrick(viewData);  // Draw ghost first (behind active)
         } else {
             // Hide ghost piece by making all tiles transparent
@@ -777,12 +797,12 @@ public class GuiController implements Initializable {
      * @return The color paint for that brick type
      */
     private Paint getFill(int v) {
-        AudioManager audioManager = AudioManager.getInstance();
-        if (audioManager == null) {
-            System.err.println("ERROR: AudioManager is null in getFill!");
+        SettingsManager settingsManager = SettingsManager.getInstance();
+        if (settingsManager == null) {
+            System.err.println("ERROR: SettingsManager is null in getFill!");
             return Color.TRANSPARENT;
         }
-        Skin currentSkin = audioManager.getSkin();
+        Skin currentSkin = settingsManager.getSkin();
         if (currentSkin == null) {
             System.err.println("ERROR: Current skin is null in getFill!");
             return Color.TRANSPARENT;
@@ -799,7 +819,7 @@ public class GuiController implements Initializable {
      * Returns a semi-transparent version of the brick color for the ghost piece.
      */
     private Paint getGhostFill(int v) {
-        Skin currentSkin = AudioManager.getInstance().getSkin();
+        Skin currentSkin = SettingsManager.getInstance().getSkin();
         return currentSkin.getGhostColor(v);
     }
 
@@ -907,8 +927,8 @@ public class GuiController implements Initializable {
     private void updateGameSpeed() {
         if (timeline != null) {
             // Get base speed from difficulty setting
-            AudioManager audioManager = AudioManager.getInstance();
-            int baseSpeed = audioManager.getDropSpeedMs();
+            SettingsManager settingsManager = SettingsManager.getInstance();
+            int baseSpeed = settingsManager.getDropSpeedMs();
             
             // Adjust speed based on level (decrease by 25ms per level, minimum 50ms)
             int speed = Math.max(50, baseSpeed - (currentLevel - 1) * 25);
@@ -962,13 +982,13 @@ public class GuiController implements Initializable {
             return;
         }
         
-        AudioManager audioManager = AudioManager.getInstance();
-        if (audioManager == null) {
-            System.err.println("ERROR: AudioManager is null!");
+        SettingsManager settingsManager = SettingsManager.getInstance();
+        if (settingsManager == null) {
+            System.err.println("ERROR: SettingsManager is null!");
             return;
         }
         
-        Skin currentSkin = audioManager.getSkin();
+        Skin currentSkin = settingsManager.getSkin();
         System.out.println("Current skin: " + (currentSkin != null ? currentSkin.getDisplayName() : "NULL"));
         System.out.println("Refreshing view with " + currentInstance.lastViewData + "...");
         
@@ -1265,9 +1285,15 @@ public class GuiController implements Initializable {
             pauseOverlay.setOpacity(0.0);
         }
         
-        // Save game state before leaving
-        if (eventListener instanceof GameController) {
+        // Only save game state if game is NOT over
+        // After Game Over, we should NOT save state (resume button shouldn't appear)
+        if (!isGameOver.get() && eventListener instanceof GameController) {
             ((GameController) eventListener).saveGameState();
+        } else if (isGameOver.get()) {
+            // Ensure game state is cleared and gameInProgress is false after Game Over
+            GameController.setGameInProgress(false);
+            GameController.clearSavedState();
+            System.out.println("Game Over detected - cleared saved state and set gameInProgress=false");
         }
         
         // Unpause complete
@@ -1296,12 +1322,21 @@ public class GuiController implements Initializable {
             // Swap root node in SINGLE scene - this prevents macOS window recreation
             StageManager.switchRoot(mainMenuRoot, "Tetris");
             
-            // Update resume button visibility
+            // Update resume button visibility immediately and again after root swap completes
             MainMenuController mainMenuController = SceneManager.getMainMenuController();
             if (mainMenuController != null) {
-                javafx.application.Platform.runLater(() -> {
+                // Update immediately (if we're on JavaFX thread)
+                if (javafx.application.Platform.isFxApplicationThread()) {
                     mainMenuController.updateResumeButtonVisibility();
+                }
+                // Also update after root swap completes (nested Platform.runLater)
+                javafx.application.Platform.runLater(() -> {
+                    javafx.application.Platform.runLater(() -> {
+                        mainMenuController.updateResumeButtonVisibility();
+                    });
                 });
+            } else {
+                System.err.println("ERROR: MainMenuController is null when returning to main menu!");
             }
         });
     }

@@ -22,7 +22,22 @@ import java.util.ResourceBundle;
 
 /**
  * Controller for the Main Menu scene.
- * Handles navigation between main menu, game, and settings.
+ * 
+ * <p>Handles navigation between the main menu, game, and settings screens.
+ * Manages the visibility of the "Resume Game" button based on game state,
+ * and coordinates scene transitions using the StageManager.</p>
+ * 
+ * <p>Main menu features:
+ * <ul>
+ *   <li>New Game - Starts a fresh game</li>
+ *   <li>Resume Game - Continues a paused game (only visible when game is in progress)</li>
+ *   <li>Settings - Opens the settings menu</li>
+ *   <li>Exit - Closes the application</li>
+ * </ul>
+ * </p>
+ * 
+ * @author Tetris Game Team
+ * @version 1.0
  */
 public class MainMenuController implements Initializable {
 
@@ -212,6 +227,34 @@ public class MainMenuController implements Initializable {
                                  ", disabled=" + exitButton.isDisabled() + 
                                  ", mouseTransparent=" + exitButton.isMouseTransparent());
                 System.out.println("Exit button handler wired (both ActionEvent and MouseEvent)");
+            }
+            
+            // Wire up Resume Game button handler (like other buttons)
+            if (resumeGameButton != null) {
+                // Clear any existing handlers first
+                resumeGameButton.setOnAction(null);
+                resumeGameButton.setOnMouseClicked(null);
+                
+                // Set up ActionEvent handler
+                resumeGameButton.setOnAction(e -> {
+                    System.out.println(">>> RESUME GAME ACTION EVENT FIRED! <<<");
+                    resumeGame(e);
+                });
+                
+                // Also add mouse click handler as backup
+                resumeGameButton.setOnMouseClicked(e -> {
+                    System.out.println(">>> RESUME GAME MOUSE CLICKED! (x=" + e.getX() + ", y=" + e.getY() + ") <<<");
+                    if (!e.isConsumed()) {
+                        e.consume();
+                        resumeGame(new ActionEvent(resumeGameButton, null));
+                    }
+                });
+                
+                System.out.println("Resume Game button state: visible=" + resumeGameButton.isVisible() + 
+                                 ", disabled=" + resumeGameButton.isDisabled() + 
+                                 ", mouseTransparent=" + resumeGameButton.isMouseTransparent() +
+                                 ", managed=" + resumeGameButton.isManaged());
+                System.out.println("Resume Game button handler wired (both ActionEvent and MouseEvent)");
             }
             
             System.out.println("MainMenuController.initialize() completed successfully!");
@@ -420,12 +463,28 @@ public class MainMenuController implements Initializable {
     public void updateResumeButtonVisibility() {
         if (resumeGameButton != null) {
             // Resume button should only appear if game is in progress (not after Game Over)
-            boolean shouldShow = GameController.isGameInProgress() && GameController.hasSavedState();
+            boolean gameInProgress = GameController.isGameInProgress();
+            boolean hasSavedState = GameController.hasSavedState();
+            boolean shouldShow = gameInProgress && hasSavedState;
+            
+            // Ensure button is enabled and clickable when visible
             resumeGameButton.setVisible(shouldShow);
             resumeGameButton.setManaged(shouldShow);
-            System.out.println("Resume button visibility updated: gameInProgress=" + 
-                             GameController.isGameInProgress() + ", hasSavedState=" + 
-                             GameController.hasSavedState() + ", showing=" + shouldShow);
+            resumeGameButton.setDisable(!shouldShow);
+            resumeGameButton.setMouseTransparent(!shouldShow);
+            
+            System.out.println("========================================");
+            System.out.println("Resume button visibility updated:");
+            System.out.println("  gameInProgress=" + gameInProgress);
+            System.out.println("  hasSavedState=" + hasSavedState);
+            System.out.println("  shouldShow=" + shouldShow);
+            System.out.println("  button.visible=" + resumeGameButton.isVisible());
+            System.out.println("  button.managed=" + resumeGameButton.isManaged());
+            System.out.println("  button.disabled=" + resumeGameButton.isDisabled());
+            System.out.println("  button.mouseTransparent=" + resumeGameButton.isMouseTransparent());
+            System.out.println("========================================");
+        } else {
+            System.err.println("ERROR: resumeGameButton is null in updateResumeButtonVisibility()!");
         }
     }
     
@@ -448,12 +507,15 @@ public class MainMenuController implements Initializable {
             primaryStage.toFront();
         }
         
-        if (!GameController.hasSavedState()) {
+        // Check if game is in progress and has saved state
+        if (!GameController.isGameInProgress() || !GameController.hasSavedState()) {
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
             alert.setTitle("No Saved Game");
             alert.setHeaderText("Cannot Resume");
             alert.setContentText("No saved game found. Please start a new game.");
             alert.showAndWait();
+            // Update button visibility after alert
+            updateResumeButtonVisibility();
             return;
         }
         
