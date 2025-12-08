@@ -11,38 +11,45 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // Load arcade fonts globally before creating any UI
+        // Load arcade fonts globally before creating any UI (heavy initialization at startup)
         loadArcadeFonts();
         
-        // Load the main menu first
-        FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/mainMenu.fxml")
-        );
-
-        Parent root = loader.load();
-
-        // Get the MainMenuController (no need to set primaryStage - controllers get it from scene)
-        MainMenuController mainMenuController = loader.getController();
-
-        // Create and show the main menu scene
+        // PRELOAD ALL FXML root nodes at startup to prevent flicker
+        SceneManager.preloadAllScenes();
+        
+        // Register the primary stage with StageManager
+        StageManager.setPrimaryStage(primaryStage);
+        
+        // Get the preloaded main menu root
+        Parent mainMenuRoot = SceneManager.getPreloadedRoot("mainMenu");
+        if (mainMenuRoot == null) {
+            System.err.println("ERROR: Main menu root not preloaded!");
+            return;
+        }
+        
+        // Configure root
+        mainMenuRoot.setMouseTransparent(false);
+        mainMenuRoot.setDisable(false);
+        mainMenuRoot.setPickOnBounds(true);
+        
+        // Create SINGLE Scene that will be used for entire application
+        // This Scene is NEVER replaced - only its root node is swapped
+        Scene singleScene = SceneManager.createSingleScene(mainMenuRoot);
+        
+        // Set up the stage - DO NOT modify size, position, or state
         primaryStage.setTitle("Tetris");
-        Scene scene = new Scene(root, 900, 700);
-        scene.setFill(javafx.scene.paint.Color.web("#000000"));
-        primaryStage.setScene(scene);
         primaryStage.setMinWidth(500);
         primaryStage.setMinHeight(550);
         
-        // Ensure the root is interactive and not blocking events
-        root.setMouseTransparent(false);
-        root.setDisable(false);
-        root.setPickOnBounds(true);
+        // Set the SINGLE scene - this is the ONLY scene assignment ever
+        primaryStage.setScene(singleScene);
         
-        // Show stage
+        // Show stage ONCE - never call show() again after this
         primaryStage.show();
         
         // Request focus for keyboard input
         javafx.application.Platform.runLater(() -> {
-            root.requestFocus();
+            mainMenuRoot.requestFocus();
         });
     }
     

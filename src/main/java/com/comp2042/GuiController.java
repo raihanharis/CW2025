@@ -36,6 +36,7 @@ import javafx.event.ActionEvent;
 import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -770,33 +771,36 @@ public class GuiController implements Initializable {
         }
     }
 
+    /**
+     * Gets the fill color for a brick value based on the currently selected skin.
+     * @param v The brick value (1-7)
+     * @return The color paint for that brick type
+     */
     private Paint getFill(int v) {
-        return switch (v) {
-            case 1 -> Color.CYAN;
-            case 2 -> Color.BLUEVIOLET;
-            case 3 -> Color.LIMEGREEN;
-            case 4 -> Color.YELLOW;
-            case 5 -> Color.RED;
-            case 6 -> Color.ORANGE;
-            case 7 -> Color.DEEPSKYBLUE;
-            default -> Color.TRANSPARENT;
-        };
+        AudioManager audioManager = AudioManager.getInstance();
+        if (audioManager == null) {
+            System.err.println("ERROR: AudioManager is null in getFill!");
+            return Color.TRANSPARENT;
+        }
+        Skin currentSkin = audioManager.getSkin();
+        if (currentSkin == null) {
+            System.err.println("ERROR: Current skin is null in getFill!");
+            return Color.TRANSPARENT;
+        }
+        Paint color = currentSkin.getColor(v);
+        if (color == null) {
+            System.err.println("ERROR: Color is null for brick value " + v + " with skin " + currentSkin);
+            return Color.TRANSPARENT;
+        }
+        return color;
     }
     
     /**
      * Returns a semi-transparent version of the brick color for the ghost piece.
      */
     private Paint getGhostFill(int v) {
-        return switch (v) {
-            case 1 -> Color.CYAN.deriveColor(0, 1, 1, 0.25);
-            case 2 -> Color.BLUEVIOLET.deriveColor(0, 1, 1, 0.25);
-            case 3 -> Color.LIMEGREEN.deriveColor(0, 1, 1, 0.25);
-            case 4 -> Color.YELLOW.deriveColor(0, 1, 1, 0.25);
-            case 5 -> Color.RED.deriveColor(0, 1, 1, 0.25);
-            case 6 -> Color.ORANGE.deriveColor(0, 1, 1, 0.25);
-            case 7 -> Color.DEEPSKYBLUE.deriveColor(0, 1, 1, 0.25);
-            default -> Color.TRANSPARENT;
-        };
+        Skin currentSkin = AudioManager.getInstance().getSkin();
+        return currentSkin.getGhostColor(v);
     }
 
     private void handleDown(MoveEvent event) {
@@ -936,6 +940,44 @@ public class GuiController implements Initializable {
     public static void updateDifficultySpeedIfActive() {
         if (currentInstance != null) {
             currentInstance.updateDifficultySpeed();
+        }
+    }
+    
+    /**
+     * Static method to refresh the view on the current GuiController instance.
+     * Called from SettingsController when skin changes to apply new colors.
+     */
+    /**
+     * Refreshes the game view if a game is currently active.
+     * This is called when settings change (like skin selection) to immediately update colors.
+     */
+    public static void refreshViewIfActive() {
+        System.out.println("=== refreshViewIfActive() called ===");
+        if (currentInstance == null) {
+            System.err.println("ERROR: currentInstance is null - no active game!");
+            return;
+        }
+        if (currentInstance.lastViewData == null) {
+            System.err.println("ERROR: lastViewData is null - game not initialized!");
+            return;
+        }
+        
+        AudioManager audioManager = AudioManager.getInstance();
+        if (audioManager == null) {
+            System.err.println("ERROR: AudioManager is null!");
+            return;
+        }
+        
+        Skin currentSkin = audioManager.getSkin();
+        System.out.println("Current skin: " + (currentSkin != null ? currentSkin.getDisplayName() : "NULL"));
+        System.out.println("Refreshing view with " + currentInstance.lastViewData + "...");
+        
+        try {
+            currentInstance.refreshView(currentInstance.lastViewData);
+            System.out.println("View refreshed successfully!");
+        } catch (Exception e) {
+            System.err.println("ERROR refreshing view: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     
@@ -1233,57 +1275,30 @@ public class GuiController implements Initializable {
      * Loads mainMenu.fxml and switches the scene.
      */
     public void returnToMainMenu() {
-        try {
-            // Stop the timeline / pause the game completely
-            if (timeline != null) {
-                timeline.stop();
-            }
-            
-            // Load the main menu
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/mainMenu.fxml")
-            );
-            
-            javafx.scene.Parent mainMenuRoot = loader.load();
-            
-            // Get Stage from current scene - do NOT use stored primaryStage
-            Stage stage = (Stage) rootPane.getScene().getWindow();
-            if (stage == null) {
-                System.err.println("ERROR: Cannot get stage from scene!");
+        // Stop the timeline / pause the game completely
+        if (timeline != null) {
+            timeline.stop();
+        }
+        
+        // Use preloaded main menu root for instant switching (root swap, not scene replacement)
+        javafx.application.Platform.runLater(() -> {
+            Parent mainMenuRoot = SceneManager.getPreloadedRoot("mainMenu");
+            if (mainMenuRoot == null) {
+                System.err.println("ERROR: Main menu root not preloaded!");
                 return;
             }
             
-            // Create main menu scene
-            javafx.scene.Scene mainMenuScene = new javafx.scene.Scene(mainMenuRoot, 900, 700);
-            mainMenuScene.setFill(javafx.scene.paint.Color.web("#000000"));
+            // Swap root node in SINGLE scene - this prevents macOS window recreation
+            StageManager.switchRoot(mainMenuRoot, "Tetris");
             
-            // Switch scene
-            stage.setScene(mainMenuScene);
-            stage.setTitle("Tetris");
-            
-            // Update resume button visibility in main menu
-            MainMenuController mainMenuController = loader.getController();
+            // Update resume button visibility
+            MainMenuController mainMenuController = SceneManager.getMainMenuController();
             if (mainMenuController != null) {
                 javafx.application.Platform.runLater(() -> {
                     mainMenuController.updateResumeButtonVisibility();
                 });
             }
-            
-            // Request focus for keyboard input
-            javafx.application.Platform.runLater(() -> {
-                try {
-                    if (mainMenuRoot != null) {
-                        mainMenuRoot.requestFocus();
-                    }
-                } catch (Exception e) {
-                    // Silently ignore focus errors
-                }
-            });
-            
-        } catch (java.io.IOException e) {
-            System.err.println("Error loading main menu scene: " + e.getMessage());
-            e.printStackTrace();
-        }
+        });
     }
     
     /**

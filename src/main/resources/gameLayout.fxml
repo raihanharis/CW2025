@@ -11,7 +11,13 @@
 <StackPane fx:id="rootPane"
            fx:controller="com.comp2042.GuiController"
            xmlns:fx="http://javafx.com/fxml"
-           style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000);">
+           prefWidth="900"
+           prefHeight="700"
+           minWidth="900"
+           minHeight="700"
+           maxWidth="900"
+           maxHeight="700"
+           style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000); -fx-scale-x: 1; -fx-scale-y: 1;">
 
     <!-- Centered Container - Wraps all three panels -->
     <HBox alignment="CENTER" 

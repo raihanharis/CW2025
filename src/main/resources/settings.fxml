@@ -10,8 +10,13 @@
       xmlns:fx="http://javafx.com/fxml"
       alignment="CENTER"
       spacing="25"
-      VBox.vgrow="ALWAYS"
-      style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000); -fx-padding: 30;">
+      prefWidth="900"
+      prefHeight="700"
+      minWidth="900"
+      minHeight="700"
+      maxWidth="900"
+      maxHeight="700"
+      style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000); -fx-padding: 30; -fx-scale-x: 1; -fx-scale-y: 1;">
     
     <!-- SETTINGS Title -->
     <Label text="SETTINGS"
@@ -39,10 +44,10 @@
             </HBox>
         </VBox>
         
-        <!-- SFX Toggle Section -->
+        <!-- Music Toggle Section -->
         <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
-            <Label text="SFX" styleClass="settings-label"/>
-            <ToggleButton fx:id="sfxToggle"
+            <Label text="MUSIC" styleClass="settings-label"/>
+            <ToggleButton fx:id="musicToggle"
                           text="ON"
                           styleClass="settings-toggle"/>
         </VBox>
@@ -80,7 +85,7 @@
         </VBox>
         
         <!-- Spacer before Back Button for breathing room -->
-        <Region prefHeight="18"/>
+        <Region prefHeight="25"/>
         
         <!-- Back Button -->
         <Button fx:id="backButton"

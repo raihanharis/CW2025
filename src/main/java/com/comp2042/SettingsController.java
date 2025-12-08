@@ -13,6 +13,8 @@ import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.Scene;
+import javafx.scene.Parent;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -30,7 +32,7 @@ public class SettingsController implements Initializable {
     private Label volumeLabel;
     
     @FXML
-    private ToggleButton sfxToggle;
+    private ToggleButton musicToggle;
     
     @FXML
     private Button backButton;
@@ -83,10 +85,11 @@ public class SettingsController implements Initializable {
                     volumeLabel.setText(String.format("%.0f%%", audioManager.getMasterVolume() * 100.0));
                 }
                 
-                if (sfxToggle != null) {
-                    boolean sfxEnabled = audioManager.isSfxEnabled();
-                    sfxToggle.setSelected(sfxEnabled);
-                    sfxToggle.setText(sfxEnabled ? "ON" : "OFF");
+                // Initialize music toggle with saved setting
+                if (musicToggle != null) {
+                    boolean musicEnabled = audioManager.isMusicEnabled();
+                    musicToggle.setSelected(musicEnabled);
+                    musicToggle.setText(musicEnabled ? "ON" : "OFF");
                 }
                 
                 // Initialize ghost piece toggle with saved setting
@@ -123,15 +126,12 @@ public class SettingsController implements Initializable {
                 
                 // Update difficulty section styling based on selection
                 updateDifficultySectionStyle();
+                
             } else {
                 // If audioManager is null, initialize with defaults
                 System.err.println("WARNING: AudioManager is null, using default values");
                 if (volumeSlider != null) volumeSlider.setValue(100.0);
                 if (volumeLabel != null) volumeLabel.setText("100%");
-                if (sfxToggle != null) {
-                    sfxToggle.setSelected(true);
-                    sfxToggle.setText("ON");
-                }
                 if (ghostToggle != null) {
                     ghostToggle.setSelected(true);
                     ghostToggle.setText("ON");
@@ -162,17 +162,18 @@ public class SettingsController implements Initializable {
                 });
             }
             
-            // SFX toggle listener - saves immediately (only if audioManager available)
-            if (audioManager != null && sfxToggle != null) {
-                sfxToggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            // Music toggle listener - saves immediately (only if audioManager available)
+            if (audioManager != null && musicToggle != null) {
+                musicToggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
                     @Override
                     public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                        audioManager.setSfxEnabled(newValue);
-                        sfxToggle.setText(newValue ? "ON" : "OFF");
+                        audioManager.setMusicEnabled(newValue);
+                        musicToggle.setText(newValue ? "ON" : "OFF");
                     }
                 });
             }
             
+            // SFX toggle listener - saves immediately (only if audioManager available)
             // Ghost piece toggle listener - saves immediately (only if audioManager available)
             if (audioManager != null && ghostToggle != null) {
                 ghostToggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -228,9 +229,9 @@ public class SettingsController implements Initializable {
                 volumeSlider.setDisable(false);
                 volumeSlider.setMouseTransparent(false);
             }
-            if (sfxToggle != null) {
-                sfxToggle.setDisable(false);
-                sfxToggle.setMouseTransparent(false);
+            if (musicToggle != null) {
+                musicToggle.setDisable(false);
+                musicToggle.setMouseTransparent(false);
             }
             if (ghostToggle != null) {
                 ghostToggle.setDisable(false);
@@ -255,6 +256,12 @@ public class SettingsController implements Initializable {
             if (backButton != null) {
                 backButton.setDisable(false);
                 backButton.setMouseTransparent(false);
+                backButton.setVisible(true);
+                backButton.setManaged(true);
+                // Ensure the button has the event handler
+                if (backButton.getOnAction() == null) {
+                    backButton.setOnAction(this::onBackClick);
+                }
             }
             
             System.out.println("SettingsController.initialize() completed successfully!");
@@ -297,44 +304,25 @@ public class SettingsController implements Initializable {
      */
     @FXML
     private void onBackClick(ActionEvent event) {
-        // Navigate back to main menu
-        try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
-                    getClass().getResource("/mainMenu.fxml")
-            );
-            
-            javafx.scene.Parent mainMenuRoot = loader.load();
-            
-            // Get Stage from current scene - do NOT use stored primaryStage
-            Stage stage = (Stage) backButton.getScene().getWindow();
-            if (stage == null) {
-                System.err.println("ERROR: Cannot get stage from scene!");
+        // Use preloaded main menu root for instant switching (root swap, not scene replacement)
+        javafx.application.Platform.runLater(() -> {
+            Parent mainMenuRoot = SceneManager.getPreloadedRoot("mainMenu");
+            if (mainMenuRoot == null) {
+                System.err.println("ERROR: Main menu root not preloaded!");
                 return;
             }
             
-            // Create main menu scene
-            javafx.scene.Scene mainMenuScene = new javafx.scene.Scene(mainMenuRoot, 900, 700);
-            mainMenuScene.setFill(javafx.scene.paint.Color.web("#000000"));
+            // Swap root node in SINGLE scene - this prevents macOS window recreation
+            StageManager.switchRoot(mainMenuRoot, "Tetris - Main Menu");
             
-            // Switch scene
-            stage.setScene(mainMenuScene);
-            stage.setTitle("Tetris - Main Menu");
-            
-            // Request focus for keyboard input
-            javafx.application.Platform.runLater(() -> {
-                try {
-                    if (mainMenuRoot != null) {
-                        mainMenuRoot.requestFocus();
-                    }
-                } catch (Exception e) {
-                    // Silently ignore focus errors
-                }
-            });
-            
-        } catch (Exception e) {
-            System.err.println("Error loading main menu: " + e.getMessage());
-            e.printStackTrace();
-        }
+            // Update resume button visibility
+            MainMenuController mainMenuController = SceneManager.getMainMenuController();
+            if (mainMenuController != null) {
+                javafx.application.Platform.runLater(() -> {
+                    mainMenuController.updateResumeButtonVisibility();
+                });
+            }
+        });
     }
 }
 

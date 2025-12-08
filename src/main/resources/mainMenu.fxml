@@ -10,7 +10,13 @@
       xmlns:fx="http://javafx.com/fxml"
       alignment="CENTER"
       spacing="50"
-      style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000); -fx-padding: 60;">
+      prefWidth="900"
+      prefHeight="700"
+      minWidth="900"
+      minHeight="700"
+      maxWidth="900"
+      maxHeight="700"
+      style="-fx-background-color: linear-gradient(to bottom, #0a0a1a, #000000); -fx-padding: 60; -fx-scale-x: 1; -fx-scale-y: 1;">
     
     <!-- TETRIS Title -->
     <Label fx:id="tetrisTitle"

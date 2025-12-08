@@ -413,6 +413,51 @@ public class MainMenuController implements Initializable {
     // Removed setPrimaryStage - we now get Stage from scene.getWindow()
     
     /**
+     * Starts background music when a game begins or resumes.
+     * Uses the default music file and respects the Music ON/OFF toggle.
+     */
+    private void startGameMusic() {
+        try {
+            AudioManager audioManager = AudioManager.getInstance();
+            if (audioManager == null) {
+                System.err.println("WARNING: AudioManager is null, cannot start music");
+                return;
+            }
+            
+            boolean musicEnabled = audioManager.isMusicEnabled();
+            System.out.println("Music enabled status: " + musicEnabled);
+            
+            if (musicEnabled) {
+                // Try MP3 first (better compatibility), then WAV
+                String musicPath = "/sounds/tetris_theme.mp3";
+                java.net.URL musicUrl = getClass().getResource(musicPath);
+                
+                // If MP3 not found, try WAV
+                if (musicUrl == null) {
+                    musicPath = "/sounds/tetris_theme.wav";
+                    musicUrl = getClass().getResource(musicPath);
+                }
+                
+                if (musicUrl != null) {
+                    System.out.println("MainMenuController: Found music file: " + musicPath);
+                    audioManager.startBackgroundMusic(musicPath);
+                    System.out.println("MainMenuController: Background music start requested");
+                } else {
+                    System.err.println("ERROR: Music file not found!");
+                    System.err.println("Please ensure you have either:");
+                    System.err.println("  - src/main/resources/sounds/tetris_theme.mp3 (recommended)");
+                    System.err.println("  - src/main/resources/sounds/tetris_theme.wav");
+                }
+            } else {
+                System.out.println("Music is disabled in settings - not starting music");
+            }
+        } catch (Exception e) {
+            System.err.println("ERROR: Could not start background music: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
      * Updates the visibility of the Resume Game button based on saved state.
      * Public so it can be called from GuiController when returning to menu.
      */
@@ -434,12 +479,8 @@ public class MainMenuController implements Initializable {
         if (event != null) {
             event.consume();
         }
-        System.out.println("========================================");
-        System.out.println(">>> RESUME GAME BUTTON CLICKED! <<<");
-        System.out.println("========================================");
         
         if (!GameController.hasSavedState()) {
-            System.err.println("ERROR: No saved game state to resume!");
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
             alert.setTitle("No Saved Game");
             alert.setHeaderText("Cannot Resume");
@@ -448,104 +489,70 @@ public class MainMenuController implements Initializable {
             return;
         }
         
-        try {
-            System.out.println("Loading gameLayout.fxml...");
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/gameLayout.fxml")
-            );
-            
-            if (loader.getLocation() == null) {
-                System.err.println("ERROR: Cannot find /gameLayout.fxml");
-                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Cannot Load Game");
-                alert.setContentText("Game layout file not found!");
-                alert.showAndWait();
-                return;
-            }
-            
-            System.out.println("Found gameLayout.fxml, loading...");
-            Parent gameRoot = loader.load();
-            System.out.println("FXML loaded successfully!");
-            
-            // Get the GUI controller from FXML
-            GuiController gui = loader.getController();
-            if (gui == null) {
-                System.err.println("ERROR: GuiController is null!");
-                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Cannot Resume Game");
-                alert.setContentText("Game controller could not be initialized.");
-                alert.showAndWait();
-                return;
-            }
-            System.out.println("GuiController obtained: " + gui);
-            
-            // Get Stage from current scene
-            Stage stage = (Stage) mainMenuRoot.getScene().getWindow();
-            if (stage == null) {
-                System.err.println("ERROR: Cannot get stage from scene!");
-                return;
-            }
-            
-            // Create the game controller - it will automatically resume from saved state
-            System.out.println("Creating GameController (will resume from saved state)...");
+        // Load FXML and create scene on background thread, then switch on JavaFX thread
+        javafx.application.Platform.runLater(() -> {
             try {
-                new GameController(gui);
-                System.out.println("GameController created and game resumed successfully!");
-            } catch (Exception e) {
-                System.err.println("ERROR: Failed to resume game: " + e.getMessage());
-                e.printStackTrace();
-                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Cannot Resume Game");
-                alert.setContentText("Failed to resume game: " + e.getMessage());
-                alert.showAndWait();
-                return;
-            }
-            
-            // Update Hard Drop label visibility based on current settings
-            try {
-                gui.updateHardDropLabelVisibility();
-                System.out.println("Hard drop label visibility updated");
-            } catch (Exception e) {
-                System.err.println("WARNING: Could not update hard drop label visibility: " + e.getMessage());
-            }
-            
-            // Create game scene
-            Scene gameScene = new Scene(gameRoot, 900, 700);
-            gameScene.setFill(javafx.scene.paint.Color.web("#000000"));
-            
-            // Ensure the game root is interactive and visible
-            gameRoot.setMouseTransparent(false);
-            gameRoot.setDisable(false);
-            gameRoot.setVisible(true);
-            gameRoot.setOpacity(1.0);
-            
-            // Switch scene
-            stage.setScene(gameScene);
-            stage.setTitle("Tetris - Game");
-            
-            // Request focus for keyboard input
-            javafx.application.Platform.runLater(() -> {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gameLayout.fxml"));
+                if (loader.getLocation() == null) {
+                    System.err.println("ERROR: Cannot find /gameLayout.fxml");
+                    return;
+                }
+                
+                Parent gameRoot = loader.load();
+                GuiController gui = loader.getController();
+                if (gui == null) {
+                    System.err.println("ERROR: GuiController is null!");
+                    return;
+                }
+                
+                // Create game controller (will resume from saved state)
                 try {
-                    if (gameRoot != null) {
+                    new GameController(gui);
+                    startGameMusic();
+                } catch (Exception e) {
+                    System.err.println("ERROR: Failed to resume game: " + e.getMessage());
+                    e.printStackTrace();
+                    return;
+                }
+                
+                // Update Hard Drop label visibility
+                try {
+                    gui.updateHardDropLabelVisibility();
+                } catch (Exception e) {
+                    // Ignore
+                }
+                
+                // Fix root pane sizing to prevent automatic resizing
+                SceneManager.fixRootPaneSizingExternal(gameRoot);
+                
+                // Ensure game root is interactive
+                gameRoot.setMouseTransparent(false);
+                gameRoot.setDisable(false);
+                gameRoot.setVisible(true);
+                gameRoot.setOpacity(1.0);
+                
+                // Swap root node in SINGLE scene - this prevents macOS window recreation
+                StageManager.switchRoot(gameRoot, "Tetris - Game");
+                
+                // Request focus for keyboard input
+                javafx.application.Platform.runLater(() -> {
+                    try {
                         javafx.scene.Node rootPane = gameRoot.lookup("#rootPane");
                         if (rootPane != null) {
                             rootPane.requestFocus();
                         } else {
                             gameRoot.requestFocus();
                         }
+                    } catch (Exception e) {
+                        // Ignore focus errors
                     }
-                } catch (Exception e) {
-                    // Silently ignore focus errors
-                }
-            });
-            
-        } catch (Exception e) {
-            System.err.println("Error resuming game: " + e.getMessage());
-            e.printStackTrace();
-        }
+                });
+                
+            } catch (Exception e) {
+                System.err.println("Error resuming game: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
     }
     
     /**
@@ -555,7 +562,7 @@ public class MainMenuController implements Initializable {
     @FXML
     private void startGame(ActionEvent event) {
         if (event != null) {
-            event.consume(); // Consume the event to prevent double-firing
+            event.consume();
         }
         System.out.println("========================================");
         System.out.println(">>> START GAME BUTTON CLICKED! <<<");
@@ -596,13 +603,6 @@ public class MainMenuController implements Initializable {
             }
             System.out.println("GuiController obtained: " + gui);
             
-            // Get Stage from current scene - do NOT use stored primaryStage
-            Stage stage = (Stage) mainMenuRoot.getScene().getWindow();
-            if (stage == null) {
-                System.err.println("ERROR: Cannot get stage from scene!");
-                return;
-            }
-            
             // Create the game controller and connect it to GUI
             System.out.println("Creating GameController...");
             try {
@@ -612,6 +612,9 @@ public class MainMenuController implements Initializable {
                 
                 new GameController(gui);
                 System.out.println("GameController created successfully!");
+                
+                // Start background music when game starts
+                startGameMusic();
             } catch (Exception e) {
                 System.err.println("ERROR: Failed to create GameController: " + e.getMessage());
                 e.printStackTrace();
@@ -632,9 +635,8 @@ public class MainMenuController implements Initializable {
                 // Continue - this is not critical
             }
             
-            // Create game scene
-            Scene gameScene = new Scene(gameRoot, 900, 700);
-            gameScene.setFill(javafx.scene.paint.Color.web("#000000"));
+            // Fix root pane sizing to prevent automatic resizing
+            SceneManager.fixRootPaneSizingExternal(gameRoot);
             
             // Ensure the game root is interactive and visible
             gameRoot.setMouseTransparent(false);
@@ -642,9 +644,8 @@ public class MainMenuController implements Initializable {
             gameRoot.setVisible(true);
             gameRoot.setOpacity(1.0);
             
-            // Switch scene
-            stage.setScene(gameScene);
-            stage.setTitle("Tetris - Game");
+            // Swap root node in SINGLE scene - this prevents macOS window recreation
+            StageManager.switchRoot(gameRoot, "Tetris - Game");
             
             // Request focus for keyboard input
             javafx.application.Platform.runLater(() -> {
@@ -686,79 +687,26 @@ public class MainMenuController implements Initializable {
     @FXML
     private void openSettings(ActionEvent event) {
         if (event != null) {
-            event.consume(); // Consume the event to prevent double-firing
-        }
-        System.out.println("\n\n========================================");
-        System.out.println(">>> SETTINGS BUTTON CLICKED! <<<");
-        System.out.println("========================================\n");
-        System.out.println("Event source: " + (event != null ? event.getSource() : "null"));
-        System.out.println("Event target: " + (event != null ? event.getTarget() : "null"));
-        
-        // Get Stage from current scene - do NOT use stored primaryStage
-        Stage stage = (Stage) mainMenuRoot.getScene().getWindow();
-        if (stage == null) {
-            System.err.println("ERROR: Cannot get stage from scene!");
-            return;
+            event.consume();
         }
         
-        try {
-            // Load FXML
-            java.net.URL settingsUrl = getClass().getResource("/settings.fxml");
-            if (settingsUrl == null) {
-                System.err.println("ERROR: Cannot find /settings.fxml");
-                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Cannot Load Settings");
-                alert.setContentText("Settings FXML file not found!");
-                alert.showAndWait();
+        // Use preloaded settings root for instant switching (root swap, not scene replacement)
+        javafx.application.Platform.runLater(() -> {
+            Parent settingsRoot = SceneManager.getPreloadedRoot("settings");
+            if (settingsRoot == null) {
+                System.err.println("ERROR: Settings root not preloaded!");
                 return;
             }
             
-            FXMLLoader loader = new FXMLLoader(settingsUrl);
-            Parent settingsRoot = loader.load();
-            
-            // Create settings scene
-            Scene settingsScene = new Scene(settingsRoot, 900, 700);
-            settingsScene.setFill(javafx.scene.paint.Color.web("#000000"));
-            
-            // Ensure the settings root is visible and interactive
+            // Ensure root is interactive
             settingsRoot.setVisible(true);
             settingsRoot.setOpacity(1.0);
             settingsRoot.setMouseTransparent(false);
             settingsRoot.setDisable(false);
             
-            // Switch scene
-            stage.setScene(settingsScene);
-            stage.setTitle("Tetris - Settings");
-            
-            // Request focus for keyboard input
-            javafx.application.Platform.runLater(() -> {
-                try {
-                    if (settingsRoot != null) {
-                        settingsRoot.requestFocus();
-                    }
-                } catch (Exception e) {
-                    // Silently ignore focus errors
-                }
-            });
-            
-        } catch (javafx.fxml.LoadException e) {
-            System.err.println("FXML Load Exception:");
-            e.printStackTrace();
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-            alert.setTitle("FXML Error");
-            alert.setHeaderText("Cannot Load Settings Screen");
-            alert.setContentText("Error loading settings.fxml:\n" + e.getMessage());
-            alert.showAndWait();
-        } catch (Exception e) {
-            System.err.println("Unexpected error:");
-            e.printStackTrace();
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Cannot Open Settings");
-            alert.setContentText("An error occurred:\n" + e.getMessage());
-            alert.showAndWait();
-        }
+            // Swap root node in SINGLE scene - this prevents macOS window recreation
+            StageManager.switchRoot(settingsRoot, "Tetris - Settings");
+        });
     }
     
     /**

@@ -72,6 +72,12 @@
                             <noManPages>true</noManPages>
                             <stripDebug>true</stripDebug>
                             <noHeaderFiles>true</noHeaderFiles>
+                            <options>
+                                <option>--add-opens</option>
+                                <option>javafx.media/javafx.scene.media=ALL-UNNAMED</option>
+                                <option>--add-opens</option>
+                                <option>javafx.base/com.sun.javafx=ALL-UNNAMED</option>
+                            </options>
                         </configuration>
                     </execution>
                 </executions>
