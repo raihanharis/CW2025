@@ -305,6 +305,8 @@
     -fx-alignment: center;
     -fx-spacing: 8;
     -fx-padding: 8;
+    -fx-border-color: transparent;
+    -fx-border-width: 0px;
 }
 
 /* Settings Label (MASTER VOLUME, MUSIC, SFX) */
@@ -456,6 +458,16 @@
 
 .settings-radio:hover .radio {
     -fx-border-color: #72ffff;
+}
+
+/* Remove JavaFX default focus borders */
+.radio-button:focused,
+.toggle-button:focused,
+.button:focused,
+.hbox:focused,
+.vbox:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
 }
 
 /* ============================================

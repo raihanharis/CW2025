@@ -279,18 +279,13 @@ public class SettingsController implements Initializable {
     
     /**
      * Updates the difficulty section styling based on current selection.
-     * Adds red border for HARD mode.
+     * No border styling - removed to prevent rectangular box appearance.
      */
     private void updateDifficultySectionStyle() {
         if (difficultySection == null) return;
         
-        boolean isHardSelected = hardRadio != null && hardRadio.isSelected();
-        
-        if (isHardSelected) {
-            difficultySection.setStyle("-fx-border-color: #ff4444; -fx-border-width: 2px; -fx-border-radius: 6px; -fx-padding: 8px;");
-        } else {
-            difficultySection.setStyle("-fx-border-color: transparent; -fx-border-width: 0px; -fx-padding: 0px;");
-        }
+        // Remove any border styling - keep it clean without rectangular boxes
+        difficultySection.setStyle("-fx-border-color: transparent; -fx-border-width: 0px; -fx-padding: 8px;");
     }
     
     /**
