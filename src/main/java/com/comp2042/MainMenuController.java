@@ -412,50 +412,6 @@ public class MainMenuController implements Initializable {
      */
     // Removed setPrimaryStage - we now get Stage from scene.getWindow()
     
-    /**
-     * Starts background music when a game begins or resumes.
-     * Uses the default music file and respects the Music ON/OFF toggle.
-     */
-    private void startGameMusic() {
-        try {
-            AudioManager audioManager = AudioManager.getInstance();
-            if (audioManager == null) {
-                System.err.println("WARNING: AudioManager is null, cannot start music");
-                return;
-            }
-            
-            boolean musicEnabled = audioManager.isMusicEnabled();
-            System.out.println("Music enabled status: " + musicEnabled);
-            
-            if (musicEnabled) {
-                // Try MP3 first (better compatibility), then WAV
-                String musicPath = "/sounds/tetris_theme.mp3";
-                java.net.URL musicUrl = getClass().getResource(musicPath);
-                
-                // If MP3 not found, try WAV
-                if (musicUrl == null) {
-                    musicPath = "/sounds/tetris_theme.wav";
-                    musicUrl = getClass().getResource(musicPath);
-                }
-                
-                if (musicUrl != null) {
-                    System.out.println("MainMenuController: Found music file: " + musicPath);
-                    audioManager.startBackgroundMusic(musicPath);
-                    System.out.println("MainMenuController: Background music start requested");
-                } else {
-                    System.err.println("ERROR: Music file not found!");
-                    System.err.println("Please ensure you have either:");
-                    System.err.println("  - src/main/resources/sounds/tetris_theme.mp3 (recommended)");
-                    System.err.println("  - src/main/resources/sounds/tetris_theme.wav");
-                }
-            } else {
-                System.out.println("Music is disabled in settings - not starting music");
-            }
-        } catch (Exception e) {
-            System.err.println("ERROR: Could not start background music: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
     
     /**
      * Updates the visibility of the Resume Game button based on saved state.
@@ -520,7 +476,6 @@ public class MainMenuController implements Initializable {
                 // Create game controller (will resume from saved state)
                 try {
                     new GameController(gui);
-                    startGameMusic();
                 } catch (Exception e) {
                     System.err.println("ERROR: Failed to resume game: " + e.getMessage());
                     e.printStackTrace();
@@ -634,9 +589,6 @@ public class MainMenuController implements Initializable {
                 
                 new GameController(gui);
                 System.out.println("GameController created successfully!");
-                
-                // Start background music when game starts
-                startGameMusic();
             } catch (Exception e) {
                 System.err.println("ERROR: Failed to create GameController: " + e.getMessage());
                 e.printStackTrace();

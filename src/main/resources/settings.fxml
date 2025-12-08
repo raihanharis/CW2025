@@ -25,33 +25,6 @@
     <!-- Settings Container -->
     <VBox alignment="CENTER" spacing="22" style="-fx-min-width: 400;">
         
-        <!-- Master Volume Section -->
-        <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
-            <Label text="MASTER VOLUME" styleClass="settings-label"/>
-            <HBox alignment="CENTER" spacing="15">
-                <Slider fx:id="volumeSlider"
-                        min="0"
-                        max="100"
-                        value="100"
-                        prefWidth="300"
-                        showTickLabels="false"
-                        showTickMarks="true"
-                        majorTickUnit="25"
-                        minorTickCount="5"/>
-                <Label fx:id="volumeLabel"
-                       text="100%"
-                       styleClass="settings-value"/>
-            </HBox>
-        </VBox>
-        
-        <!-- Music Toggle Section -->
-        <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
-            <Label text="MUSIC" styleClass="settings-label"/>
-            <ToggleButton fx:id="musicToggle"
-                          text="ON"
-                          styleClass="settings-toggle"/>
-        </VBox>
-        
         <!-- Ghost Piece Toggle Section -->
         <VBox alignment="CENTER" spacing="10" styleClass="settings-section">
             <Label text="SHOW GHOST PIECE" styleClass="settings-label"/>

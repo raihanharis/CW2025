@@ -21,18 +21,9 @@ import java.util.ResourceBundle;
 
 /**
  * Controller for the Settings scene.
- * Handles volume control, music toggle, and SFX toggle.
+ * Handles volume control and SFX toggle.
  */
 public class SettingsController implements Initializable {
-    
-    @FXML
-    private Slider volumeSlider;
-    
-    @FXML
-    private Label volumeLabel;
-    
-    @FXML
-    private ToggleButton musicToggle;
     
     @FXML
     private Button backButton;
@@ -74,25 +65,8 @@ public class SettingsController implements Initializable {
                 // Continue - settings can work without AudioManager
             }
             
-            // Initialize volume slider with current volume (only if audioManager is available)
+            // Initialize ghost piece toggle with saved setting (only if audioManager is available)
             if (audioManager != null) {
-                if (volumeSlider != null) {
-                    double currentVolume = audioManager.getMasterVolume() * 100.0;  // Convert to 0-100
-                    volumeSlider.setValue(currentVolume);
-                }
-                
-                if (volumeLabel != null) {
-                    volumeLabel.setText(String.format("%.0f%%", audioManager.getMasterVolume() * 100.0));
-                }
-                
-                // Initialize music toggle with saved setting
-                if (musicToggle != null) {
-                    boolean musicEnabled = audioManager.isMusicEnabled();
-                    musicToggle.setSelected(musicEnabled);
-                    musicToggle.setText(musicEnabled ? "ON" : "OFF");
-                }
-                
-                // Initialize ghost piece toggle with saved setting
                 if (ghostToggle != null) {
                     boolean ghostEnabled = audioManager.isGhostPieceEnabled();
                     ghostToggle.setSelected(ghostEnabled);
@@ -130,8 +104,6 @@ public class SettingsController implements Initializable {
             } else {
                 // If audioManager is null, initialize with defaults
                 System.err.println("WARNING: AudioManager is null, using default values");
-                if (volumeSlider != null) volumeSlider.setValue(100.0);
-                if (volumeLabel != null) volumeLabel.setText("100%");
                 if (ghostToggle != null) {
                     ghostToggle.setSelected(true);
                     ghostToggle.setText("ON");
@@ -147,33 +119,6 @@ public class SettingsController implements Initializable {
                 }
             }
         
-            // Master volume slider listener - saves immediately (only if audioManager available)
-            if (audioManager != null && volumeSlider != null && volumeLabel != null) {
-                volumeSlider.valueProperty().addListener(new ChangeListener<Number>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                        double volumePercent = newValue.doubleValue();
-                        double volume = volumePercent / 100.0;  // Convert to 0.0-1.0
-                        // Update volume immediately and save
-                        audioManager.setMasterVolume(volume);
-                        // Update label
-                        volumeLabel.setText(String.format("%.0f%%", volumePercent));
-                    }
-                });
-            }
-            
-            // Music toggle listener - saves immediately (only if audioManager available)
-            if (audioManager != null && musicToggle != null) {
-                musicToggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                        audioManager.setMusicEnabled(newValue);
-                        musicToggle.setText(newValue ? "ON" : "OFF");
-                    }
-                });
-            }
-            
-            // SFX toggle listener - saves immediately (only if audioManager available)
             // Ghost piece toggle listener - saves immediately (only if audioManager available)
             if (audioManager != null && ghostToggle != null) {
                 ghostToggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -225,14 +170,6 @@ public class SettingsController implements Initializable {
             }
             
             // Ensure all controls are enabled and clickable
-            if (volumeSlider != null) {
-                volumeSlider.setDisable(false);
-                volumeSlider.setMouseTransparent(false);
-            }
-            if (musicToggle != null) {
-                musicToggle.setDisable(false);
-                musicToggle.setMouseTransparent(false);
-            }
             if (ghostToggle != null) {
                 ghostToggle.setDisable(false);
                 ghostToggle.setMouseTransparent(false);

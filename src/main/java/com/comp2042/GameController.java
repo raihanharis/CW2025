@@ -40,54 +40,6 @@ public class GameController implements InputEventListener {
         
         // Initialize high score display
         gui.updateHighScore(highScore);
-        
-        // Start background music when game is initialized or resumed
-        startGameMusic();
-    }
-    
-    /**
-     * Starts background music when a game begins or resumes.
-     * Uses the default music file and respects the Music ON/OFF toggle.
-     */
-    private void startGameMusic() {
-        try {
-            AudioManager audioManager = AudioManager.getInstance();
-            if (audioManager == null) {
-                System.err.println("WARNING: AudioManager is null, cannot start music");
-                return;
-            }
-            
-            boolean musicEnabled = audioManager.isMusicEnabled();
-            System.out.println("GameController: Music enabled status: " + musicEnabled);
-            
-            if (musicEnabled) {
-                // Try MP3 first (better compatibility), then WAV
-                String musicPath = "/sounds/tetris_theme.mp3";
-                java.net.URL musicUrl = getClass().getResource(musicPath);
-                
-                // If MP3 not found, try WAV
-                if (musicUrl == null) {
-                    musicPath = "/sounds/tetris_theme.wav";
-                    musicUrl = getClass().getResource(musicPath);
-                }
-                
-                if (musicUrl != null) {
-                    System.out.println("GameController: Found music file: " + musicPath);
-                    audioManager.startBackgroundMusic(musicPath);
-                    System.out.println("GameController: Background music start requested");
-                } else {
-                    System.err.println("ERROR: Music file not found!");
-                    System.err.println("Please ensure you have either:");
-                    System.err.println("  - src/main/resources/sounds/tetris_theme.mp3 (recommended)");
-                    System.err.println("  - src/main/resources/sounds/tetris_theme.wav");
-                }
-            } else {
-                System.out.println("GameController: Music is disabled in settings - not starting music");
-            }
-        } catch (Exception e) {
-            System.err.println("ERROR: Could not start background music: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
     
     /**

@@ -1247,7 +1247,7 @@ public class GuiController implements Initializable {
     /**
      * Handles the Main Menu button click.
      * Stops the game and returns to the main menu.
-     * Music continues playing (unless disabled in settings).
+     * Returns to main menu.
      */
     @FXML
     private void onMainMenuClick(ActionEvent event) {
@@ -1270,7 +1270,7 @@ public class GuiController implements Initializable {
             ((GameController) eventListener).saveGameState();
         }
         
-        // Restore music volume if it was reduced during pause
+        // Unpause complete
         // Return to main menu
         returnToMainMenu();
     }
