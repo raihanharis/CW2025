@@ -304,6 +304,15 @@ public class SettingsController implements Initializable {
      */
     @FXML
     private void onBackClick(ActionEvent event) {
+        // IMMEDIATELY prevent minimization before any operations
+        Stage primaryStage = StageManager.getPrimaryStage();
+        if (primaryStage != null) {
+            if (primaryStage.isIconified()) {
+                primaryStage.setIconified(false);
+            }
+            primaryStage.toFront();
+        }
+        
         // Use preloaded main menu root for instant switching (root swap, not scene replacement)
         javafx.application.Platform.runLater(() -> {
             Parent mainMenuRoot = SceneManager.getPreloadedRoot("mainMenu");

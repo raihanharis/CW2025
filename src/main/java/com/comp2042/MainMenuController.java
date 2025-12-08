@@ -480,6 +480,15 @@ public class MainMenuController implements Initializable {
             event.consume();
         }
         
+        // IMMEDIATELY prevent minimization before any operations
+        Stage primaryStage = StageManager.getPrimaryStage();
+        if (primaryStage != null) {
+            if (primaryStage.isIconified()) {
+                primaryStage.setIconified(false);
+            }
+            primaryStage.toFront();
+        }
+        
         if (!GameController.hasSavedState()) {
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
             alert.setTitle("No Saved Game");
@@ -564,6 +573,16 @@ public class MainMenuController implements Initializable {
         if (event != null) {
             event.consume();
         }
+        
+        // IMMEDIATELY prevent minimization before any operations
+        Stage primaryStage = StageManager.getPrimaryStage();
+        if (primaryStage != null) {
+            if (primaryStage.isIconified()) {
+                primaryStage.setIconified(false);
+            }
+            primaryStage.toFront();
+        }
+        
         System.out.println("========================================");
         System.out.println(">>> START GAME BUTTON CLICKED! <<<");
         System.out.println("========================================");
@@ -690,6 +709,15 @@ public class MainMenuController implements Initializable {
             event.consume();
         }
         
+        // IMMEDIATELY prevent minimization before any operations
+        Stage primaryStage = StageManager.getPrimaryStage();
+        if (primaryStage != null) {
+            if (primaryStage.isIconified()) {
+                primaryStage.setIconified(false);
+            }
+            primaryStage.toFront();
+        }
+        
         // Use preloaded settings root for instant switching (root swap, not scene replacement)
         javafx.application.Platform.runLater(() -> {
             Parent settingsRoot = SceneManager.getPreloadedRoot("settings");
@@ -710,22 +738,19 @@ public class MainMenuController implements Initializable {
     }
     
     /**
-     * Exits the application immediately without confirmation.
+     * Exits the application immediately without any window state changes.
+     * Does NOT minimize, hide, or resize the Stage.
+     * Simply calls Platform.exit() and System.exit(0) for instant termination.
      */
     @FXML
     private void exitGame(ActionEvent event) {
         if (event != null) {
-            event.consume(); // Consume the event to prevent double-firing
+            event.consume();
         }
-        System.out.println(">>> EXIT BUTTON CLICKED! <<<");
-        // Get Stage from current scene and close
-        Stage stage = (Stage) mainMenuRoot.getScene().getWindow();
-        if (stage != null) {
-            stage.close();
-        } else {
-            // Fallback: exit the JavaFX application
-            javafx.application.Platform.exit();
-        }
+        
+        // Exit immediately - no window state changes, no delays
+        javafx.application.Platform.exit();
+        System.exit(0);
     }
 }
 
