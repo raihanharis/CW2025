@@ -1187,6 +1187,11 @@ public class GuiController implements Initializable {
             pauseButton.setVisible(false);
             pauseButton.setManaged(false);
         }
+        
+        // Mark game as no longer in progress and clear saved state
+        // This prevents Resume button from appearing after Game Over
+        GameController.setGameInProgress(false);
+        GameController.clearSavedState();
     }
 
     public void newGame(ActionEvent event) {

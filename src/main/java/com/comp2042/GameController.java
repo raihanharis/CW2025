@@ -10,6 +10,9 @@ public class GameController implements InputEventListener {
     
     // Saved game state for resume functionality
     private static GameState savedGameState = null;
+    
+    // Global game state flag: true when game is in progress, false after Game Over
+    private static boolean gameInProgress = false;
 
     /**
      * Creates a new GameController, either starting fresh or resuming from saved state.
@@ -29,6 +32,9 @@ public class GameController implements InputEventListener {
             board.createNewBrick();
             gui.initGameView(board.getBoardMatrix(), board.getViewData());
         }
+        
+        // Mark game as in progress (either new game or resumed)
+        gameInProgress = true;
         
         gui.bindScore(board.getScore().scoreProperty());
         
@@ -146,6 +152,7 @@ public class GameController implements InputEventListener {
      */
     public static void clearSavedState() {
         savedGameState = null;
+        gameInProgress = false; // Game is no longer in progress after clearing state
     }
     
     /**
@@ -153,6 +160,22 @@ public class GameController implements InputEventListener {
      */
     public static boolean hasSavedState() {
         return savedGameState != null;
+    }
+    
+    /**
+     * Checks if a game is currently in progress (not Game Over).
+     * Used to determine if Resume button should be visible.
+     */
+    public static boolean isGameInProgress() {
+        return gameInProgress;
+    }
+    
+    /**
+     * Sets the game in progress flag.
+     * Called when starting a new game or resuming.
+     */
+    public static void setGameInProgress(boolean inProgress) {
+        gameInProgress = inProgress;
     }
     
     /**
@@ -263,5 +286,7 @@ public class GameController implements InputEventListener {
         clearSavedState();
         board.newGame();
         gui.refreshView(board.getViewData());
+        // Mark game as in progress after restart
+        gameInProgress = true;
     }
 }

@@ -463,10 +463,13 @@ public class MainMenuController implements Initializable {
      */
     public void updateResumeButtonVisibility() {
         if (resumeGameButton != null) {
-            boolean hasSavedState = GameController.hasSavedState();
-            resumeGameButton.setVisible(hasSavedState);
-            resumeGameButton.setManaged(hasSavedState);
-            System.out.println("Resume button visibility updated: " + hasSavedState);
+            // Resume button should only appear if game is in progress (not after Game Over)
+            boolean shouldShow = GameController.isGameInProgress() && GameController.hasSavedState();
+            resumeGameButton.setVisible(shouldShow);
+            resumeGameButton.setManaged(shouldShow);
+            System.out.println("Resume button visibility updated: gameInProgress=" + 
+                             GameController.isGameInProgress() + ", hasSavedState=" + 
+                             GameController.hasSavedState() + ", showing=" + shouldShow);
         }
     }
     
